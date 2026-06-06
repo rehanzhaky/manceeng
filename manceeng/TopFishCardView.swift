@@ -20,7 +20,7 @@ struct TopFishCardView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Image(systemName: "fish.fill")
-                .font(.system(size: 64))
+                .font(.system(size: 100))
                 .foregroundStyle(Color.brandWhite.opacity(0.6))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
@@ -28,16 +28,18 @@ struct TopFishCardView: View {
             HStack(spacing: 24) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Berat")
-                        .font(.caption)
+                        .font(.callout)
                         .foregroundStyle(Color.brandWhite.opacity(0.7))
                     Text(weightName)
                         .font(.boldTitle2)
                         .foregroundStyle(Color.brandWhite)
                 }
+                
+                Spacer()
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Panjang")
-                        .font(.caption)
+                        .font(.callout)
                         .foregroundStyle(Color.brandWhite.opacity(0.7))
                     Text(lengthName)
                         .font(.boldTitle2)
@@ -47,7 +49,7 @@ struct TopFishCardView: View {
         }
         .padding(24)
         .aspectRatio(1, contentMode: .fit)
-        .frame(maxWidth: 400)
+        .frame(maxWidth: 300)
         .background(
             LinearGradient(
                 colors: [Color.brandDark, Color.brandBlue],

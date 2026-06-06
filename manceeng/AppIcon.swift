@@ -7,9 +7,8 @@
 
 import Foundation
 import SwiftUI
-import SF
 
-extension Icon {
+enum AppIcon {
     static let iconMap    = Image(systemName: "map")
     static let iconFish   = Image(systemName: "fish")
     static let iconCamera = Image(systemName: "camera")

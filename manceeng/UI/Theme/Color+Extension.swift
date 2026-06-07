@@ -39,5 +39,10 @@ extension Color {
     static let brandCyan       = Color(hex: "00C6FF")
     static let brandBlack      = Color(hex: "000000")
     static let brandWhite      = Color(hex: "FFFFFF")
+    
     static let white70 = Color.white.opacity(0.7)
+
+    // Main screen — background gelap & aksen gradient/glow biru
+    static let brandNavy       = Color(hex: "02022E")
+    static let brandSky        = Color(hex: "0090DF")
 }

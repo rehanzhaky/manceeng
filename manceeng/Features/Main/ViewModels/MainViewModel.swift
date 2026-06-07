@@ -14,7 +14,7 @@ final class MainViewModel: ObservableObject {
 
     /// Daftar tangkapan ikan. Kosong → tampilkan empty state.
     @Published var catches: [Catch]
-
+    @Published var showCamera = false
     /// Tangkapan teratas yang ditampilkan di kartu depan.
     var topCatch: Catch? { catches.first }
 
@@ -24,13 +24,14 @@ final class MainViewModel: ObservableObject {
     init(catches: [Catch] = []) {
         self.catches = catches
     }
-
+    
     // MARK: - Actions
 
     /// Tombol kamera ditekan.
     func capturePhoto() {
         SoundEffect.cameraShutter()
         // TODO: aksi buka kamera & tambah hasil ke `catches`.
+        showCamera = true
     }
 
     /// Tombol peta (kiri atas) ditekan.

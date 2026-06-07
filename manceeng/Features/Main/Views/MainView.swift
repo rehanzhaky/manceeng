@@ -36,6 +36,10 @@ struct MainView: View {
                 }
                 .padding(.bottom, 40)
             }
+        }.fullScreenCover( //Sebagian besar menggunakan present/fullscreen modal, bukan push dari navigation stack.
+            isPresented: $viewModel.showCamera
+        ) {
+            CameraView()
         }
     }
 
@@ -69,9 +73,13 @@ struct MainView: View {
 }
 
 #Preview("Ada Card") {
-    MainView(viewModel: MainViewModel(catches: [
-        Catch(name: "Ikan Lele", weight: "1.1 kg", length: "15 cm"),
-        Catch(name: "Ikan Nila", weight: "0.8 kg", length: "12 cm"),
-        Catch(name: "Ikan Mas",  weight: "1.5 kg", length: "20 cm")
-    ]))
+    MainView(
+        viewModel: MainViewModel(
+            catches: [
+                Catch(
+                    name: "Ikan Lele", weight: "15 Kg", length: "100 Cm",
+                )
+            ]
+        )
+    )
 }

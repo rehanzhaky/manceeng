@@ -6,3 +6,13 @@
 //
 
 import Foundation
+import CoreGraphics
+
+struct DetectedFish: Identifiable {
+    let id = UUID()
+    var boundingBox: CGRect
+    let confidence: Float
+    var estimatedLengthCm: Double?
+    var estimatedWeightKg: Double?
+    var species: String?
+}

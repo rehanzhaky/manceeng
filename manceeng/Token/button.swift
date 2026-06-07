@@ -10,6 +10,7 @@ import SwiftUI
 
 enum AppImage: String {
     case NextButton = "button"
+    case StartButton = "button(start)"
 
     var image: Image {
         Image(rawValue)

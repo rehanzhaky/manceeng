@@ -10,6 +10,13 @@ import SwiftUI
 struct TemplateCanvasView: View {
     let data: FishCatch
     let layout: TemplateLayout
+    var photoAdjustment: PhotoAdjustment = .identity
+    var onPhotoAdjustmentChange: ((PhotoAdjustment) -> Void)?
+
+    @State private var basePhotoAdjustment = PhotoAdjustment.identity
+    @GestureState private var dragTranslation: CGSize = .zero
+    @GestureState private var magnification: CGFloat = 1
+    @GestureState private var rotation: Angle = .degrees(0)
 
     var body: some View {
         GeometryReader { geometry in
@@ -24,19 +31,12 @@ struct TemplateCanvasView: View {
                 layout.fishName.color.opacity(0.08)
                     .ignoresSafeArea()
 
-                Image(layout.backgroundImageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: contentSize.width, height: contentSize.height)
-                    .position(x: canvasSize.width / 2, y: canvasSize.height / 2)
-
-                Image(data.fishImageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: contentSize.width * layout.fishImage.widthRatio)
-                    .rotationEffect(layout.fishImage.rotation)
-                    .position(position(for: layout.fishImage.center, in: contentSize, origin: contentOrigin))
-                    .shadow(color: .black.opacity(0.22), radius: contentSize.width * 0.018, x: 0, y: contentSize.width * 0.012)
+                switch layout.renderMode {
+                case .normal:
+                    normalTemplateLayers(in: canvasSize, contentSize: contentSize, contentOrigin: contentOrigin)
+                case .twibbon:
+                    twibbonTemplateLayers(in: canvasSize, contentSize: contentSize, contentOrigin: contentOrigin)
+                }
 
                 anchoredText(fishName, anchor: layout.fishName, in: contentSize, origin: contentOrigin)
 
@@ -46,10 +46,115 @@ struct TemplateCanvasView: View {
             }
         }
         .aspectRatio(layout.contentAspectRatio, contentMode: .fit)
+        .onAppear {
+            basePhotoAdjustment = photoAdjustment
+        }
+        .onChange(of: photoAdjustment.scale) { _, _ in
+            basePhotoAdjustment = photoAdjustment
+        }
+        .onChange(of: photoAdjustment.offset) { _, _ in
+            basePhotoAdjustment = photoAdjustment
+        }
+        .onChange(of: photoAdjustment.rotation) { _, _ in
+            basePhotoAdjustment = photoAdjustment
+        }
     }
 
     private var fishName: String {
         layout.fishName.uppercase ? data.fishName.uppercased() : data.fishName
+    }
+
+    private var currentPhotoAdjustment: PhotoAdjustment {
+        PhotoAdjustment(
+            scale: max(0.6, min(basePhotoAdjustment.scale * magnification, 4)),
+            offset: CGSize(
+                width: basePhotoAdjustment.offset.width + dragTranslation.width,
+                height: basePhotoAdjustment.offset.height + dragTranslation.height
+            ),
+            rotation: basePhotoAdjustment.rotation + rotation
+        )
+    }
+
+    private func normalTemplateLayers(in canvasSize: CGSize, contentSize: CGSize, contentOrigin: CGPoint) -> some View {
+        ZStack {
+            templateOverlay(in: canvasSize, contentSize: contentSize)
+
+            fishImage(in: contentSize, origin: contentOrigin)
+        }
+    }
+
+    private func twibbonTemplateLayers(in canvasSize: CGSize, contentSize: CGSize, contentOrigin: CGPoint) -> some View {
+        ZStack {
+            adjustableFishImage(in: contentSize, origin: contentOrigin)
+
+            templateOverlay(in: canvasSize, contentSize: contentSize)
+        }
+        .contentShape(Rectangle())
+        .gesture(photoAdjustmentGesture)
+    }
+
+    private func templateOverlay(in canvasSize: CGSize, contentSize: CGSize) -> some View {
+        Image(layout.backgroundImageName)
+            .resizable()
+            .scaledToFit()
+            .frame(width: contentSize.width, height: contentSize.height)
+            .position(x: canvasSize.width / 2, y: canvasSize.height / 2)
+    }
+
+    private func fishImage(in size: CGSize, origin: CGPoint) -> some View {
+        Image(data.fishImageName)
+            .resizable()
+            .scaledToFit()
+            .frame(width: size.width * layout.fishImage.widthRatio)
+            .rotationEffect(layout.fishImage.rotation)
+            .position(position(for: layout.fishImage.center, in: size, origin: origin))
+            .shadow(color: .black.opacity(0.22), radius: size.width * 0.018, x: 0, y: size.width * 0.012)
+    }
+
+    private func adjustableFishImage(in size: CGSize, origin: CGPoint) -> some View {
+        let adjustment = currentPhotoAdjustment
+
+        return Image(data.fishImageName)
+            .resizable()
+            .scaledToFill()
+            .frame(width: size.width, height: size.height)
+            .scaleEffect(adjustment.scale)
+            .rotationEffect(layout.fishImage.rotation + adjustment.rotation)
+            .position(position(for: layout.fishImage.center, in: size, origin: origin))
+            .offset(adjustment.offset)
+            .clipped()
+    }
+
+    private var photoAdjustmentGesture: some Gesture {
+        SimultaneousGesture(
+            DragGesture()
+                .updating($dragTranslation) { value, state, _ in
+                    state = value.translation
+                }
+                .onEnded { value in
+                    basePhotoAdjustment.offset.width += value.translation.width
+                    basePhotoAdjustment.offset.height += value.translation.height
+                    onPhotoAdjustmentChange?(basePhotoAdjustment)
+                },
+            SimultaneousGesture(
+                MagnificationGesture()
+                    .updating($magnification) { value, state, _ in
+                        state = value
+                    }
+                    .onEnded { value in
+                        basePhotoAdjustment.scale = max(0.6, min(basePhotoAdjustment.scale * value, 4))
+                        onPhotoAdjustmentChange?(basePhotoAdjustment)
+                    },
+                RotationGesture()
+                    .updating($rotation) { value, state, _ in
+                        state = value
+                    }
+                    .onEnded { value in
+                        basePhotoAdjustment.rotation += value
+                        onPhotoAdjustmentChange?(basePhotoAdjustment)
+                    }
+            )
+        )
     }
 
     private func anchoredText(_ text: String, anchor: TextAnchor, in size: CGSize, origin: CGPoint) -> some View {

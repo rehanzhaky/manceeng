@@ -10,6 +10,8 @@ import SwiftUI
 struct TemplateCarouselCard: View {
     let data: FishCatch
     let layout: TemplateLayout
+    var photoAdjustment: PhotoAdjustment = .identity
+    var onPhotoAdjustmentChange: ((PhotoAdjustment) -> Void)?
 
     var body: some View {
         ZStack {
@@ -18,7 +20,12 @@ struct TemplateCarouselCard: View {
                 .frame(height: 280)
                 .padding(.horizontal, 18)
 
-            TemplateCanvasView(data: data, layout: layout)
+            TemplateCanvasView(
+                data: data,
+                layout: layout,
+                photoAdjustment: photoAdjustment,
+                onPhotoAdjustmentChange: onPhotoAdjustmentChange
+            )
                 .aspectRatio(layout.contentAspectRatio, contentMode: .fit)
                 .frame(height: 430)
                 .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))

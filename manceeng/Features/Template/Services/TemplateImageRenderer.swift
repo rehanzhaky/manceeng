@@ -10,8 +10,13 @@ import UIKit
 
 enum TemplateImageRenderer {
     @MainActor
-    static func render(data: FishCatch, layout: TemplateLayout, exportSize: CGSize = CGSize(width: 2048, height: 2048)) -> UIImage? {
-        let content = TemplateCanvasView(data: data, layout: layout)
+    static func render(
+        data: FishCatch,
+        layout: TemplateLayout,
+        photoAdjustment: PhotoAdjustment = .identity,
+        exportSize: CGSize = CGSize(width: 2048, height: 2048)
+    ) -> UIImage? {
+        let content = TemplateCanvasView(data: data, layout: layout, photoAdjustment: photoAdjustment)
             .frame(width: exportSize.width, height: exportSize.height)
 
         let renderer = ImageRenderer(content: content)

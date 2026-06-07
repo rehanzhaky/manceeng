@@ -11,9 +11,15 @@ struct TemplateLayout: Identifiable {
     let id: String
     let name: String
     let backgroundImageName: String
+    let renderMode: TemplateRenderMode
     let contentAspectRatio: CGFloat
     let fishImage: ImageAnchor
     let fishName: TextAnchor
     let length: MetricAnchor
     let weight: MetricAnchor
+}
+
+enum TemplateRenderMode {
+    case normal
+    case twibbon
 }

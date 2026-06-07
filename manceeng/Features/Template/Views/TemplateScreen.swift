@@ -13,6 +13,7 @@ struct TemplateScreen: View {
 
     @State private var activeCarouselID: String?
     @State private var shareImage: ShareImage?
+    @State private var photoAdjustments: [String: PhotoAdjustment] = [:]
 
     private static let middleLoopIndex = 10
     private static let loopCount = 21
@@ -85,7 +86,14 @@ struct TemplateScreen: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 24) {
                     ForEach(carouselItems) { item in
-                        TemplateCarouselCard(data: fishCatch(for: item.layoutIndex), layout: item.layout)
+                        TemplateCarouselCard(
+                            data: fishCatch(for: item.layoutIndex),
+                            layout: item.layout,
+                            photoAdjustment: photoAdjustment(for: item.layout),
+                            onPhotoAdjustmentChange: { adjustment in
+                                photoAdjustments[item.layout.id] = adjustment
+                            }
+                        )
                             .frame(width: cardWidth)
                             .id(item.id)
                     }
@@ -115,7 +123,11 @@ struct TemplateScreen: View {
     private func shareCurrentTemplate() {
         let activeLayoutIndex = layouts.firstIndex { $0.id == activeLayout.id } ?? 0
 
-        if let image = TemplateImageRenderer.render(data: fishCatch(for: activeLayoutIndex), layout: activeLayout) {
+        if let image = TemplateImageRenderer.render(
+            data: fishCatch(for: activeLayoutIndex),
+            layout: activeLayout,
+            photoAdjustment: photoAdjustment(for: activeLayout)
+        ) {
             shareImage = ShareImage(image: image)
         }
     }
@@ -126,6 +138,10 @@ struct TemplateScreen: View {
         }
 
         return fishCatches[index]
+    }
+
+    private func photoAdjustment(for layout: TemplateLayout) -> PhotoAdjustment {
+        photoAdjustments[layout.id] ?? .identity
     }
 
 }

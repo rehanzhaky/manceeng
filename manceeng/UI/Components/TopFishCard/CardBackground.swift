@@ -9,20 +9,20 @@ import SwiftUI
 
 struct CardBackground: View {
     var body: some View {
-        RoundedRectangle(cornerRadius: EnumBorder.borderRadius)
+        RoundedRectangle(cornerRadius: Radius.borderRadius.rawValue)
             .fill(
                 LinearGradient(
                     colors: [
-                        .brandPrimaryBlue1,
-                        .neutralSecondaryBlue2,
+                        .brandDark,
+                        .brandBlue,
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             )
             .overlay {
-                RoundedRectangle(cornerRadius: EnumBorder.borderRadius)
-                    .stroke(Color.surfaceAccentBlue3.opacity(0.7), lineWidth: 2)
+                RoundedRectangle(cornerRadius: Radius.borderRadius.rawValue)
+                    .stroke(Color.brandCyan.opacity(0.7), lineWidth: 2)
             }
     }
 }

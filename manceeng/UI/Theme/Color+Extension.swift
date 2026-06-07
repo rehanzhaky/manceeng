@@ -39,4 +39,5 @@ extension Color {
     static let brandCyan       = Color(hex: "00C6FF")
     static let brandBlack      = Color(hex: "000000")
     static let brandWhite      = Color(hex: "FFFFFF")
+    static let white70 = Color.white.opacity(0.7)
 }

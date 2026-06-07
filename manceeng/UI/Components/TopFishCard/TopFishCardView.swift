@@ -11,7 +11,7 @@ struct TopFishCardView: View {
     var body: some View {
         VStack(alignment: .leading){
             Text("Fish Name 1").font(.headline).foregroundStyle(Color.white70)
-            EnumAppIcon.fishIcon
+            Image(systemName: "fish.fill")
                 .padding(.vertical)
                 .font(.system(size: 97))
                 .foregroundStyle(Color.white70)
@@ -35,14 +35,14 @@ struct TopFishCardView: View {
         .background(
             LinearGradient(
                    colors: [
-                       .brandPrimaryBlue1,
-                       .neutralSecondaryBlue2
+                       .brandDark,
+                       .brandBlue
                    ],
                    startPoint: .topLeading,
                    endPoint: .bottomTrailing
                )
         )
-        .clipShape(RoundedRectangle(cornerRadius: EnumBorder.borderRadius))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.borderRadius.rawValue))
         .shadow(radius: 4)
         
     }

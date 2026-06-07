@@ -1,18 +1,18 @@
 //
-//  FishCard.swift
+//  CameraView.swift
 //  manceeng
 //
-//  Created by Made Vidyatma Adhi Krisna on 05/06/26.
+//  Created by Made Vidyatma Adhi Krisna on 07/06/26.
 //
 
 import SwiftUI
 
-struct FishCard: View {
+struct CameraView: View {
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
     }
 }
 
 #Preview {
-    FishCard()
+    CameraView()
 }

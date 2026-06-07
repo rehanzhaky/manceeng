@@ -11,31 +11,49 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
+    @State private var isShowingTemplateScreen = false
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        NavigationStack {
+            ZStack(alignment: .bottomTrailing) {
+                List {
+                    ForEach(items) { item in
+                        NavigationLink {
+                            Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                        } label: {
+                            Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                        }
+                    }
+                    .onDelete(perform: deleteItems)
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        EditButton()
+                    }
+                    ToolbarItem {
+                        Button(action: addItem) {
+                            Label("Add Item", systemImage: "plus")
+                        }
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+
+                Button {
+                    isShowingTemplateScreen = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.brandWhite)
+                        .frame(width: 58, height: 58)
+                        .background(Color.brandBlue)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 6)
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+                .padding(.trailing, 24)
+                .padding(.bottom, 24)
             }
-        } detail: {
-            Text("Select an item")
+            .navigationDestination(isPresented: $isShowingTemplateScreen) {
+                TemplateScreen()
+            }
         }
     }
 

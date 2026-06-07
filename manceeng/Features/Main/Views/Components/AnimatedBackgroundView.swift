@@ -45,7 +45,6 @@ private struct GradientBubble: View {
 
     @State private var position: CGPoint = .zero
     @State private var scale: CGFloat = 1
-    @State private var timer: Timer?
 
     var body: some View {
         GeometryReader { geo in
@@ -65,25 +64,17 @@ private struct GradientBubble: View {
                 .scaleEffect(scale)
                 .position(position)
                 .onAppear {
-                    // Posisi awal acak.
                     position = randomPoint(in: geo.size)
-
-                    // Denyut membesar–mengecil terus-menerus.
                     withAnimation(.easeInOut(duration: pulseDuration).repeatForever(autoreverses: true)) {
                         scale = 1.25
                     }
-
-                    // Mulai mengembara ke titik acak baru terus-menerus.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
-                        moveToRandom(in: geo.size)
-                        timer = Timer.scheduledTimer(withTimeInterval: moveDuration, repeats: true) { _ in
-                            moveToRandom(in: geo.size)
-                        }
-                    }
                 }
-                .onDisappear {
-                    timer?.invalidate()
-                    timer = nil
+                .task {
+                    try? await Task.sleep(for: .seconds(startDelay))
+                    while !Task.isCancelled {
+                        moveToRandom(in: geo.size)
+                        try? await Task.sleep(for: .seconds(moveDuration))
+                    }
                 }
         }
     }

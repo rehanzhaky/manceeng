@@ -11,26 +11,29 @@
 import SwiftUI
 
 struct SwimmingFishView: View {
-    // fish.fill menghadap KANAN secara default (0°).
-    // scaleX: -1 dipakai saat bergerak ke kiri agar ikan tidak terbalik (belly tetap di bawah).
-    // Tilt (rotasi) dihitung dari komponen vertikal relatif terhadap arah hadap ikan.
+    // fish.fill menghadap KANAN secara default — head at image (1, 0).
+    // scaleX: -1 mirrors the fish so it faces LEFT.
+    // tilt (rotationEffect) is applied AFTER scaleEffect, so transforms compose as:
+    //   screen_pos = Rotation(tilt) * Scale(scaleX) * image_pos
+    //
+    // For head at image (1, 0):
+    //   Right-facing (scaleX=+1): screen head = (cos tilt,  sin tilt)  → θ = atan2(dy, dx)
+    //   Left-facing  (scaleX=-1): screen head = (−cos tilt, −sin tilt) → θ = atan2(−dy, −dx)
     @State private var scaleX: CGFloat = 1
     @State private var posX: CGFloat = 0
     @State private var posY: CGFloat = 0
     @State private var tilt: Double = 0        // −90° (atas) s/d +90° (bawah)
 
-    // Batas area renang dalam frame.
     private let rangeX: CGFloat = 90
     private let rangeY: CGFloat = 70
 
     var body: some View {
         ZStack {
-            // Bayangan elips — posisi ikut ikan.
             Ellipse()
                 .fill(Color.brandSky.opacity(0.15))
                 .frame(width: 65, height: 10)
                 .blur(radius: 5)
-                .offset(x: posX, y: rangeY - 4)   // selalu di "lantai" area
+                .offset(x: posX, y: rangeY - 4)
 
             Image(systemName: "fish.fill")
                 .font(.system(size: 64))
@@ -53,7 +56,6 @@ struct SwimmingFishView: View {
     }
 
     private func swim() {
-        // Titik tujuan acak dalam area renang.
         let targetX = CGFloat.random(in: -rangeX * 0.85 ... rangeX * 0.85)
         let targetY = CGFloat.random(in: -rangeY * 0.85 ... rangeY * 0.85)
 
@@ -62,25 +64,28 @@ struct SwimmingFishView: View {
         let dist = sqrt(dx * dx + dy * dy)
         guard dist > 18 else { swim(); return }
 
-        // Tentukan arah hadap: kiri atau kanan berdasarkan dx.
-        // Saat dx ≈ 0 (gerak murni vertikal), pertahankan scaleX terakhir.
         let newScaleX: CGFloat = dx > 5 ? 1 : (dx < -5 ? -1 : scaleX)
         let needsFlip = newScaleX != scaleX
 
-        // Tilt: sudut vertikal dari perspektif ikan (selalu −90°…+90°, tidak pernah terbalik).
-        // Ikan menghadap kanan: tilt = atan2(dy, dx); menghadap kiri: mirror → atan2(dy, -dx).
-        let effectiveDX = newScaleX > 0 ? Double(dx) : Double(-dx)
-        let newTilt = atan2(Double(dy), effectiveDX) * 180 / .pi
+        // Tilt so the head faces the destination.
+        // Right-facing: head at (cos θ, sin θ)  → θ = atan2(dy,  dx)
+        // Left-facing:  head at (−cos θ, −sin θ) → θ = atan2(−dy, −dx)
+        let newTilt: Double
+        if newScaleX > 0 {
+            newTilt = atan2(Double(dy),  Double(dx))  * 180 / .pi
+        } else {
+            newTilt = atan2(-Double(dy), -Double(dx)) * 180 / .pi
+        }
 
         let pxPerSec = Double.random(in: 38...68)
         let moveDur  = max(0.7, dist / CGFloat(pxPerSec))
         let pause    = Double.random(in: 0.1...0.6)
 
         if needsFlip {
-            // Squish → flip → expand sebelum bergerak.
+            // Squish to flat, flip direction while invisible, then expand.
             withAnimation(.easeIn(duration: 0.08)) { scaleX = 0 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-                scaleX = newScaleX
+                // scaleX state is 0; animate to newScaleX so the expand is visible.
                 withAnimation(.easeOut(duration: 0.08)) {
                     scaleX = newScaleX
                     tilt = newTilt
@@ -100,7 +105,7 @@ struct SwimmingFishView: View {
             posX = tx
             posY = ty
         }
-        // Luruskan tilt menjelang akhir perjalanan.
+        // Straighten toward horizontal near the end of each leg.
         DispatchQueue.main.asyncAfter(deadline: .now() + duration * 0.75) {
             withAnimation(.easeOut(duration: duration * 0.25)) { tilt = 0 }
         }

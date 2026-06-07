@@ -13,8 +13,6 @@ struct CircleIconButton: View {
     let systemName: String
     var action: () -> Void
 
-    @State private var pressed = false
-
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
@@ -25,15 +23,8 @@ struct CircleIconButton: View {
                 .glassStyle(Circle())
                 .shadow(color: Color.brandSky.opacity(0.6), radius: 16)
                 .shadow(color: Color.brandSky.opacity(0.3), radius: 28)
-                .scaleEffect(pressed ? 0.92 : 1)
-                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: pressed)
         }
-        .buttonStyle(.plain)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in pressed = true }
-                .onEnded { _ in pressed = false }
-        )
+        .buttonStyle(GlassPressStyle())
     }
 }
 

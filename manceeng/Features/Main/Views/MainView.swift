@@ -27,7 +27,11 @@ struct MainView: View {
 
                 Spacer()
 
-                CatchCardStackView(catches: viewModel.catches)
+                if let front = viewModel.catches.first {
+                    TopFishCardStackView(model: front)
+                } else {
+                    EmptyCatchStateView()
+                }
 
                 Spacer()
 
@@ -41,7 +45,6 @@ struct MainView: View {
 
     // MARK: - Sections
 
-    /// Top bar: ikon peta (kiri) & ikan (kanan).
     private var topBar: some View {
         HStack {
             CircleIconButton(systemName: "map.fill") { viewModel.openMap() }
@@ -55,7 +58,7 @@ struct MainView: View {
     private var title: some View {
         HStack {
             Text(viewModel.title)
-                .font(.LargeTitleBlack)
+                .font(.largeTitleBlack)
                 .foregroundStyle(Color.brandWhite)
             Spacer()
         }
@@ -70,8 +73,8 @@ struct MainView: View {
 
 #Preview("Ada Card") {
     MainView(viewModel: MainViewModel(catches: [
-        Catch(name: "Ikan Lele", weight: "1.1 kg", length: "15 cm"),
-        Catch(name: "Ikan Nila", weight: "0.8 kg", length: "12 cm"),
-        Catch(name: "Ikan Mas",  weight: "1.5 kg", length: "20 cm")
+        Catch(name: "Ikan Lele", weightKg: 1.1, lengthCm: 15),
+        Catch(name: "Ikan Nila", weightKg: 0.8, lengthCm: 12),
+        Catch(name: "Ikan Mas",  weightKg: 1.5, lengthCm: 20)
     ]))
 }

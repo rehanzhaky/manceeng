@@ -7,10 +7,9 @@
 
 import Foundation
 
-/// Data satu tangkapan ikan yang ditampilkan di halaman Main.
 struct Catch: Identifiable {
     let id = UUID()
     let name: String
-    let weight: String
-    let length: String
+    let weightKg: Double
+    let lengthCm: Double
 }

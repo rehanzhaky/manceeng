@@ -19,6 +19,7 @@ struct MapView: View {
     /// Catch yang langsung dipilih saat map dibuka (mis. dari History).
     private let initialSelection: CatchLocation?
     @State private var didApplyInitialSelection = false
+    @State private var templateLocation: CatchLocation?
 
     init(viewModel: MapViewModel = MapViewModel(), initialSelection: CatchLocation? = nil) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -75,14 +76,24 @@ struct MapView: View {
                 viewModel.select(initialSelection)
             }
         }
+        .fullScreenCover(item: $templateLocation) { location in
+            TemplateScreen(
+                fishCatches: [FishCatch(location: location)],
+                shouldAutoShare: true
+            )
+        }
     }
 
     /// Share & delete untuk pin terpilih — di kanan atas layar, di luar modal.
     private func catchActions(for location: CatchLocation) -> some View {
         HStack(spacing: 2) {
-            ShareLink(item: shareText(for: location)) {
+            Button {
+                templateLocation = location
+            } label: {
                 actionIcon("square.and.arrow.up")
             }
+            .buttonStyle(.plain)
+
             Button(role: .destructive) {
                 withAnimation { viewModel.delete(location) }
             } label: {
@@ -103,10 +114,6 @@ struct MapView: View {
             .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(.white)
             .frame(width: 40, height: 40)
-    }
-
-    private func shareText(for location: CatchLocation) -> String {
-        "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
     }
 
     private var backButton: some View {

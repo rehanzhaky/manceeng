@@ -105,15 +105,7 @@ struct TemplateScreen: View {
 
     private var topBar: some View {
         HStack {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.brandWhite)
-                    .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
-            }
+            CircleIconButton(systemName: "chevron.left") { dismiss() }
 
             Spacer()
 

@@ -13,3 +13,14 @@ struct FishCatch {
     let length: Double
     let fishImageName: String
 }
+
+extension FishCatch {
+    init(location: CatchLocation) {
+        self.init(
+            fishName: location.fishName,
+            weight: location.weightKg,
+            length: location.lengthCm,
+            fishImageName: location.imageName ?? "ikan_1"
+        )
+    }
+}

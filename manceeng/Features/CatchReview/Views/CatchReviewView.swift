@@ -32,22 +32,24 @@ struct CatchReviewView: View {
 
     var body: some View {
         ZStack {
-            AnimatedBackgroundView()
+            LinearGradient.catchDetail
+                .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                topBar
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                
-                Spacer()
-                
-                fishPreview
-                
-                Spacer()
-                
-                infoCard
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 32)
+            VStack(spacing: 16) {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        fishPreview
+                        infoCard
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 76)
+                    .padding(.bottom, 24)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+
+                saveButton
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
             }
 
             if showShareSection {
@@ -55,6 +57,7 @@ struct CatchReviewView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+        .overlay(alignment: .top) { topBar }
         .animation(.spring(response: 0.32, dampingFraction: 0.88), value: showShareSection)
         .fullScreenCover(isPresented: $isTemplatePresented) {
             TemplateScreen(
@@ -76,103 +79,96 @@ struct CatchReviewView: View {
 
     private var topBar: some View {
         HStack {
-            Button {
-                onRetake()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(.black)
-                    .frame(width: 52, height: 52)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
-            }
-            .buttonStyle(.plain)
+            CircleIconButton(systemName: "chevron.left") { onRetake() }
 
             Spacer()
 
-            HStack(spacing: 8) {
-                Button {
-                    isTemplatePresented = true
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.black)
-                }
-                
-                Button(role: .destructive) {
-                    // Delete action
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.black)
-                }
+            Button {
+                isTemplatePresented = true
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color.brandWhite)
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                    .frame(width: 52, height: 52)
+                    .glassStyle(Circle())
+                    .shadow(color: Color.brandSky.opacity(0.6), radius: 16)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
     }
 
     private var fishPreview: some View {
-        Group {
-            if let image = viewModel.image,
-               let primaryFish = viewModel.primaryFish {
-                ReviewCroppedPreview(
-                    image: image,
-                    boundingBox: primaryFish.boundingBox,
-                    displaySize: CGSize(width: 300, height: 300)
-                )
-            } else if let image = viewModel.image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                Image(systemName: "fish.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundStyle(.white.opacity(0.6))
-                    .frame(width: 200, height: 200)
+        GeometryReader { proxy in
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+
+                if let image = viewModel.image,
+                   let primaryFish = viewModel.primaryFish {
+                    ReviewCroppedPreview(
+                        image: image,
+                        boundingBox: primaryFish.boundingBox,
+                        displaySize: proxy.size
+                    )
+                } else if let image = viewModel.image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    Image(systemName: "fish.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(Color.brandWhite.opacity(0.9))
+                        .padding(40)
+                }
             }
         }
-        .frame(height: 300)
+        .frame(maxWidth: .infinity)
+        .frame(height: 220)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
     }
 
     private var infoCard: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            field(label: "Nama Ikan", value: viewModel.fishName.isEmpty ? "Catfish" : viewModel.fishName)
+        VStack(alignment: .leading, spacing: 22) {
+            field(label: "Nama Ikan", value: viewModel.fishName)
 
             HStack(alignment: .top, spacing: 0) {
-                valueField(label: "Weight", value: viewModel.weightText.isEmpty ? "0.7" : viewModel.weightText, unit: "kg")
+                field(label: "Weight", value: viewModel.weightText)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                valueField(label: "Length", value: viewModel.lengthText.isEmpty ? "15" : viewModel.lengthText, unit: "cm")
+                field(label: "Length", value: viewModel.lengthText)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             field(label: "Location", value: "South China Sea")
         }
-        .padding(24)
+        .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(.white.opacity(0.08))
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.white.opacity(0.06))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(.white.opacity(0.25), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.28), lineWidth: 1)
         )
     }
 
     private func field(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(Color.brandWhite.opacity(0.7))
             Text(value)
-                .font(.largeTitle.bold())
-                .foregroundStyle(.white)
+                .font(.title2.bold())
+                .foregroundStyle(Color.brandWhite)
         }
     }
+
+    private var saveButton: some View {
+        ButtonOnboard(title: "Save", action: onDone)
 
     private func valueField(label: String, value: String, unit: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {

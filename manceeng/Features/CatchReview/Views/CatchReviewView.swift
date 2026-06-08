@@ -31,25 +31,23 @@ struct CatchReviewView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color(hex: "0094D8"), Color(hex: "043A9A"), Color.brandNavy],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            AnimatedBackgroundView()
 
-            VStack(spacing: 16) {
+            VStack(spacing: 0) {
                 topBar
-                Spacer(minLength: 8)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                
+                Spacer()
+                
                 fishPreview
-                title
+                
+                Spacer()
+                
                 infoCard
-                actionButtons
-                Spacer(minLength: 0)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 32)
             }
-            .padding(.horizontal, 22)
-            .padding(.top, 18)
-            .padding(.bottom, 28)
 
             if showShareSection {
                 shareSection
@@ -65,129 +63,113 @@ struct CatchReviewView: View {
                 onRetake()
             } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 36, height: 36)
-                    .background(.white.opacity(0.18), in: Circle())
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.black)
+                    .frame(width: 52, height: 52)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
             }
             .buttonStyle(.plain)
 
             Spacer()
 
-            Button {
-                showShareSection = true
-            } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 36, height: 36)
-                    .background(.white.opacity(0.18), in: Circle())
+            HStack(spacing: 8) {
+                Button {
+                    showShareSection = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.black)
+                }
+                
+                Button(role: .destructive) {
+                    // Delete action
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.black)
+                }
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
         }
     }
 
     private var fishPreview: some View {
-        GeometryReader { proxy in
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.white.opacity(0.08))
-
-                if let image = viewModel.image,
-                   let primaryFish = viewModel.primaryFish {
-                    ReviewCroppedPreview(
-                        image: image,
-                        boundingBox: primaryFish.boundingBox,
-                        displaySize: proxy.size
-                    )
-                } else if let image = viewModel.image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-                }
+        Group {
+            if let image = viewModel.image,
+               let primaryFish = viewModel.primaryFish {
+                ReviewCroppedPreview(
+                    image: image,
+                    boundingBox: primaryFish.boundingBox,
+                    displaySize: CGSize(width: 300, height: 300)
+                )
+            } else if let image = viewModel.image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                Image(systemName: "fish.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.white.opacity(0.6))
+                    .frame(width: 200, height: 200)
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 230)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .shadow(color: Color.brandSky.opacity(0.35), radius: 24, y: 10)
-    }
-
-    private var title: some View {
-        HStack {
-            Text("Mancing Sore")
-                .font(.system(size: 24, weight: .bold))
-                .foregroundStyle(.white)
-
-            Spacer()
-        }
+        .frame(height: 300)
     }
 
     private var infoCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 12) {
-                infoRow(title: "Nama Ikan", value: viewModel.fishName)
+        VStack(alignment: .leading, spacing: 24) {
+            field(label: "Nama Ikan", value: viewModel.fishName.isEmpty ? "Catfish" : viewModel.fishName)
 
-                HStack(spacing: 36) {
-                    infoRow(title: "Weight", value: viewModel.weightText)
-                    infoRow(title: "Length", value: viewModel.lengthText)
-                }
-
-                infoRow(title: "Location", value: "South China Sea")
+            HStack(alignment: .top, spacing: 0) {
+                valueField(label: "Weight", value: viewModel.weightText.isEmpty ? "0.7" : viewModel.weightText, unit: "kg")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                valueField(label: "Length", value: viewModel.lengthText.isEmpty ? "15" : viewModel.lengthText, unit: "cm")
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
+
+            field(label: "Location", value: "South China Sea")
         }
+        .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .background(Color.brandNavy.opacity(0.72), in: RoundedRectangle(cornerRadius: 8))
+        .background(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(.white.opacity(0.08))
+        )
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.brandSky.opacity(0.9), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(.white.opacity(0.25), lineWidth: 1)
         )
     }
 
-    private func infoRow(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(.white.opacity(0.7))
-
+    private func field(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.75))
             Text(value)
-                .font(.system(size: 15, weight: .bold))
+                .font(.largeTitle.bold())
                 .foregroundStyle(.white)
         }
     }
 
-    private var actionButtons: some View {
-        VStack(spacing: 10) {
-            Button(action: onDone) {
-                Text("Save")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.brandBlue, in: RoundedRectangle(cornerRadius: 8))
+    private func valueField(label: String, value: String, unit: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.75))
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(value)
+                    .font(.system(size: 40, weight: .bold))
+                Text(unit)
+                    .font(.title2.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.9))
             }
-            .buttonStyle(.plain)
-
-            Button {
-                onRetake()
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                    Text("Retake")
-                        .font(.system(size: 15, weight: .semibold))
-                }
-                .foregroundStyle(.white.opacity(0.88))
-                .frame(maxWidth: .infinity)
-                .frame(height: 46)
-                .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(.white.opacity(0.2), lineWidth: 1)
-                )
-            }
-            .buttonStyle(.plain)
+            .foregroundStyle(.white)
         }
     }
 

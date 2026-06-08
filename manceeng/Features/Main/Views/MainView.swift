@@ -71,6 +71,9 @@ struct MainView: View {
         .fullScreenCover(isPresented: $viewModel.isMapPresented) {
             MapView()
         }
+        .fullScreenCover(isPresented: $viewModel.isHistoryPresented) {
+            HistoryView()
+        }
         .onAppear {
             if !hasSeenTutorial && !viewModel.isTutorialActive {
                 viewModel.startTutorial()

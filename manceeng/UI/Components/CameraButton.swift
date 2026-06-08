@@ -2,11 +2,9 @@
 //  CameraButton.swift
 //  manceeng
 //
-//  Tombol kamera bergaya liquid glass: tengah transparan, hanya aksen
-//  gradient biru di tepi, dengan glow biru lembut di luar.
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 //
-//  Created by M. Iqbal on 06/06/26.
-//
+
 
 import SwiftUI
 
@@ -14,10 +12,9 @@ struct CameraButton: View {
     var action: () -> Void
 
     private let size: CGFloat = 88
-    private let corner: CGFloat = 26
 
-    private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: corner, style: .continuous)
+    private var shape: Circle {
+        Circle()
     }
 
     var body: some View {

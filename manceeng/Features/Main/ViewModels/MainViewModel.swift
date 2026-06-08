@@ -14,6 +14,7 @@ final class MainViewModel: ObservableObject {
     @Published var catches: [Catch]
     @Published var isCameraPresented = false
     @Published var isMapPresented = false
+    @Published var isHistoryPresented = false
 
     var topCatch: Catch? { catches.first }
     var hasCatches: Bool { !catches.isEmpty }
@@ -48,7 +49,7 @@ final class MainViewModel: ObservableObject {
     }
 
     func openFishList() {
-        // TODO: navigasi ke daftar ikan.
+        isHistoryPresented = true
     }
 
     // MARK: - Tutorial actions

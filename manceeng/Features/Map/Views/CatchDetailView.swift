@@ -2,8 +2,9 @@
 //  CatchDetailView.swift
 //  manceeng
 //
-//  Detail satu tangkapan, ditampilkan sebagai modal sheet saat marker peta
-//  di-tap. Berisi foto ikan, info (nama/berat/panjang/lokasi), share & delete.
+//  Konten detail tangkapan (Summary Detail) + halaman push-nya.
+//  Di peta dipakai lewat CatchDetailPanel (bottom panel custom);
+//  di History dipakai sebagai halaman penuh (push) dengan top bar.
 //
 //  Created by M. Iqbal on 08/06/26.
 //
@@ -11,71 +12,38 @@
 import SwiftUI
 import CoreLocation
 
-struct CatchDetailView: View {
-    let location: CatchLocation
-    /// `true` saat sheet ditarik penuh → tampil seperti halaman (ada tombol back).
-    var isExpanded: Bool = false
-    var onDelete: () -> Void
+extension LinearGradient {
+    /// Gradient biru khas halaman detail tangkapan.
+    static var catchDetail: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color(hex: "2C7FB8"),
+                Color(hex: "0B3A86"),
+                Color(hex: "05123A")
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+}
 
-    @Environment(\.dismiss) private var dismiss
-    @State private var isShowingTemplateScreen = false
+// MARK: - Konten (transparan; background disediakan pemanggil)
+
+struct CatchDetailContent: View {
+    let location: CatchLocation
+    var topInset: CGFloat = 24
 
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color.brandBlue, Color.brandDark],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-
-            VStack(spacing: 20) {
-                actionBar
+        ScrollView {
+            VStack(spacing: 24) {
                 fishImage
                 infoCard
-                Spacer(minLength: 0)
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, topInset)
+            .padding(.bottom, 24)
         }
-        .fullScreenCover(isPresented: $isShowingTemplateScreen) {
-            TemplateScreen(shouldAutoShare: true)
-        }
-    }
-
-    // MARK: - Sections
-
-    private var actionBar: some View {
-        HStack {
-            if isExpanded {
-                Button { dismiss() } label: {
-                    icon("chevron.left")
-                }
-                .background(.ultraThinMaterial, in: Circle())
-            }
-
-            Spacer()
-
-            HStack(spacing: 4) {
-                Button {
-                    isShowingTemplateScreen = true
-                } label: {
-                    icon("square.and.arrow.up")
-                }
-
-                Button(role: .destructive, action: onDelete) {
-                    icon("trash")
-                }
-            }
-            .padding(6)
-            .background(.ultraThinMaterial, in: Capsule())
-        }
-    }
-
-    private func icon(_ systemName: String) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 18, weight: .semibold))
-            .foregroundStyle(Color.brandWhite)
-            .frame(width: 40, height: 40)
+        .scrollBounceBehavior(.basedOnSize)
     }
 
     private var fishImage: some View {
@@ -88,82 +56,120 @@ struct CatchDetailView: View {
                 Image(systemName: "fish.fill")
                     .resizable()
                     .scaledToFit()
-                    .foregroundStyle(Color.brandWhite.opacity(0.85))
-                    .padding(.horizontal, 40)
+                    .foregroundStyle(Color.brandWhite.opacity(0.9))
+                    .padding(.horizontal, 60)
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 180)
+        .frame(height: 220)
+        .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
     }
 
     private var infoCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            field(label: "Nama Ikan", value: location.fishName, prominent: true)
+        VStack(alignment: .leading, spacing: 22) {
+            field(label: "Nama Ikan", value: location.fishName)
 
-            HStack(alignment: .top) {
+            HStack(alignment: .top, spacing: 0) {
                 valueField(label: "Weight", value: location.weightKg.formatted(), unit: "kg")
-                Spacer()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 valueField(label: "Length", value: location.lengthCm.formatted(), unit: "cm")
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            field(label: "Location", value: location.locationName, prominent: true)
+            field(label: "Location", value: location.locationName)
         }
-        .padding(20)
+        .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(Color.white.opacity(0.06))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.brandWhite.opacity(0.25), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.28), lineWidth: 1)
         )
     }
 
-    // MARK: - Rows
-
-    private func field(label: String, value: String, prominent: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    private func field(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.footnote)
+                .font(.subheadline)
                 .foregroundStyle(Color.brandWhite.opacity(0.7))
             Text(value)
-                .font(prominent ? .title3.bold() : .body)
+                .font(.title2.bold())
                 .foregroundStyle(Color.brandWhite)
         }
     }
 
     private func valueField(label: String, value: String, unit: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.footnote)
+                .font(.subheadline)
                 .foregroundStyle(Color.brandWhite.opacity(0.7))
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(value)
-                    .font(.title.bold())
+                    .font(.system(size: 30, weight: .bold))
                 Text(unit)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.brandWhite.opacity(0.8))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.brandWhite.opacity(0.85))
             }
             .foregroundStyle(Color.brandWhite)
         }
     }
 }
 
-#Preview {
-    Color.black
-        .sheet(isPresented: .constant(true)) {
-            CatchDetailView(
-                location: CatchLocation(
-                    fishName: "Catfish",
-                    coordinate: .init(latitude: 1.0, longitude: 104.0),
-                    weightKg: 0.7,
-                    lengthCm: 15,
-                    locationName: "South China Sea"
-                ),
-                onDelete: {}
-            )
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
+// MARK: - Halaman push (History): gradient penuh + top bar back/share
+
+struct CatchDetailView: View {
+    let location: CatchLocation
+    /// `true` saat dibuka sebagai halaman (push) → tampilkan top bar back + share.
+    var showsActions: Bool = false
+
+    @Environment(\.dismiss) private var dismiss
+
+    private var shareText: String {
+        "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
+    }
+
+    var body: some View {
+        ZStack {
+            LinearGradient.catchDetail.ignoresSafeArea()
+            CatchDetailContent(location: location, topInset: showsActions ? 76 : 24)
         }
+        .overlay(alignment: .top) {
+            if showsActions { topBar }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    private var topBar: some View {
+        HStack {
+            CircleIconButton(systemName: "chevron.left") { dismiss() }
+            Spacer()
+            ShareLink(item: shareText) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color.brandWhite)
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                    .frame(width: 52, height: 52)
+                    .glassStyle(Circle())
+                    .shadow(color: Color.brandSky.opacity(0.6), radius: 16)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+    }
+}
+
+#Preview {
+    CatchDetailView(
+        location: CatchLocation(
+            fishName: "Catfish",
+            coordinate: .init(latitude: 1.0, longitude: 104.0),
+            weightKg: 0.7,
+            lengthCm: 15,
+            locationName: "South China Sea"
+        ),
+        showsActions: true
+    )
 }

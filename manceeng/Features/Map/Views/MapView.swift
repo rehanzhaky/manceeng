@@ -13,20 +13,26 @@ import MapKit
 
 struct MapView: View {
     @StateObject private var viewModel: MapViewModel
+    @StateObject private var locationManager = LocationManager()
     @Environment(\.dismiss) private var dismiss
-    @State private var detent: PresentationDetent = .medium
 
-    init(viewModel: MapViewModel = MapViewModel()) {
+    /// Catch yang langsung dipilih saat map dibuka (mis. dari History).
+    private let initialSelection: CatchLocation?
+    @State private var didApplyInitialSelection = false
+
+    init(viewModel: MapViewModel = MapViewModel(), initialSelection: CatchLocation? = nil) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.initialSelection = initialSelection
     }
 
     var body: some View {
         Map(position: $viewModel.cameraPosition) {
+            UserAnnotation()
+
             ForEach(viewModel.locations) { location in
                 Annotation("", coordinate: location.coordinate, anchor: .bottom) {
                     CatchMapMarker(location: location)
                         .onTapGesture {
-                            detent = .medium
                             withAnimation(.easeInOut(duration: 0.4)) {
                                 viewModel.select(location)
                             }
@@ -35,18 +41,72 @@ struct MapView: View {
             }
         }
         .mapStyle(.standard(elevation: .flat))
+        .onMapCameraChange { context in
+            viewModel.updateVisibleRegion(context.region)
+        }
         .ignoresSafeArea()
         .overlay(alignment: .topLeading) {
             backButton
         }
-        .sheet(item: $viewModel.selectedLocation) { location in
-            CatchDetailView(location: location, isExpanded: detent == .large) {
-                viewModel.delete(location)
+        .overlay(alignment: .topTrailing) {
+            if let selected = viewModel.selectedLocation {
+                catchActions(for: selected)
             }
-            .presentationDetents([.medium, .large], selection: $detent)
-            .presentationDragIndicator(detent == .large ? .hidden : .visible)
-            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
         }
+        .overlay(alignment: .trailing) {
+            if viewModel.selectedLocation == nil {
+                mapControls
+            }
+        }
+        // Bottom panel custom (pengganti .sheet) — sudut kotak, full, tanpa scrim.
+        .overlay {
+            if let selected = viewModel.selectedLocation {
+                CatchDetailPanel(location: selected) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewModel.selectedLocation = nil
+                    }
+                }
+            }
+        }
+        .onAppear {
+            locationManager.requestPermission()
+            if !didApplyInitialSelection, let initialSelection {
+                didApplyInitialSelection = true
+                viewModel.select(initialSelection)
+            }
+        }
+    }
+
+    /// Share & delete untuk pin terpilih — di kanan atas layar, di luar modal.
+    private func catchActions(for location: CatchLocation) -> some View {
+        HStack(spacing: 2) {
+            ShareLink(item: shareText(for: location)) {
+                actionIcon("square.and.arrow.up")
+            }
+            Button(role: .destructive) {
+                withAnimation { viewModel.delete(location) }
+            } label: {
+                actionIcon("trash")
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(5)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 1))
+        .padding(.trailing, 16)
+        .padding(.top, 8)
+        .transition(.opacity)
+    }
+
+    private func actionIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+    }
+
+    private func shareText(for location: CatchLocation) -> String {
+        "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
     }
 
     private var backButton: some View {
@@ -61,6 +121,32 @@ struct MapView: View {
         }
         .padding(.leading, 20)
         .padding(.top, 8)
+    }
+
+    private var mapControls: some View {
+        VStack(spacing: 16) {
+            MapZoomControl { factor in
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    viewModel.zoom(by: factor)
+                }
+            }
+
+            Button {
+                locationManager.requestPermission()
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    viewModel.goToUserLocation()
+                }
+            } label: {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color.brandBlue)
+                    .frame(width: 46, height: 46)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.15), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.trailing, 16)
     }
 }
 

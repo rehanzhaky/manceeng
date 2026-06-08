@@ -77,7 +77,10 @@ struct CatchReviewView: View {
                     .glassStyle(Circle())
                     .shadow(color: Color.brandSky.opacity(0.6), radius: 16)
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 1))
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)

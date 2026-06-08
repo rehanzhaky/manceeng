@@ -19,6 +19,7 @@ struct MainView: View {
     }
 
     var body: some View {
+        NavigationStack {
         ZStack {
             AnimatedBackgroundView()
 
@@ -72,10 +73,15 @@ struct MainView: View {
         .fullScreenCover(isPresented: $viewModel.isMapPresented) {
             MapView()
         }
+        .navigationDestination(isPresented: $viewModel.isHistoryPresented) {
+            HistoryView()
+        }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             if !hasSeenTutorial && !viewModel.isTutorialActive {
                 viewModel.startTutorial()
             }
+        }
         }
     }
 

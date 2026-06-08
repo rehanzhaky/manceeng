@@ -2,9 +2,9 @@
 //  CatchDetailView.swift
 //  manceeng
 //
-//  Detail satu tangkapan (Summary Detail), ditampilkan sebagai modal sheet
-//  saat marker peta di-tap. Hanya foto ikan + info; aksi (share/delete) ada
-//  di kanan atas layar peta.
+//  Konten detail tangkapan (Summary Detail) + halaman push-nya.
+//  Di peta dipakai lewat CatchDetailPanel (bottom panel custom);
+//  di History dipakai sebagai halaman penuh (push) dengan top bar.
 //
 //  Created by M. Iqbal on 08/06/26.
 //
@@ -12,10 +12,9 @@
 import SwiftUI
 import CoreLocation
 
-struct CatchDetailView: View {
-    let location: CatchLocation
-
-    private var background: LinearGradient {
+extension LinearGradient {
+    /// Gradient biru khas halaman detail tangkapan.
+    static var catchDetail: LinearGradient {
         LinearGradient(
             colors: [
                 Color(hex: "2C7FB8"),
@@ -26,26 +25,26 @@ struct CatchDetailView: View {
             endPoint: .bottom
         )
     }
+}
+
+// MARK: - Konten (transparan; background disediakan pemanggil)
+
+struct CatchDetailContent: View {
+    let location: CatchLocation
+    var topInset: CGFloat = 24
 
     var body: some View {
-        ZStack {
-            background.ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: 24) {
-                    fishImage
-                    infoCard
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 24)
+        ScrollView {
+            VStack(spacing: 24) {
+                fishImage
+                infoCard
             }
-            .scrollBounceBehavior(.basedOnSize)
+            .padding(.horizontal, 20)
+            .padding(.top, topInset)
+            .padding(.bottom, 24)
         }
-        .presentationBackground(.clear)
+        .scrollBounceBehavior(.basedOnSize)
     }
-
-    // MARK: - Fish image
 
     private var fishImage: some View {
         Group {
@@ -65,8 +64,6 @@ struct CatchDetailView: View {
         .frame(height: 220)
         .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
     }
-
-    // MARK: - Info card
 
     private var infoCard: some View {
         VStack(alignment: .leading, spacing: 22) {
@@ -121,19 +118,58 @@ struct CatchDetailView: View {
     }
 }
 
-#Preview {
-    Color.black
-        .sheet(isPresented: .constant(true)) {
-            CatchDetailView(
-                location: CatchLocation(
-                    fishName: "Catfish",
-                    coordinate: .init(latitude: 1.0, longitude: 104.0),
-                    weightKg: 0.7,
-                    lengthCm: 15,
-                    locationName: "South China Sea"
-                )
-            )
-            .presentationDetents([.fraction(0.85)])
-            .presentationDragIndicator(.visible)
+// MARK: - Halaman push (History): gradient penuh + top bar back/share
+
+struct CatchDetailView: View {
+    let location: CatchLocation
+    /// `true` saat dibuka sebagai halaman (push) → tampilkan top bar back + share.
+    var showsActions: Bool = false
+
+    @Environment(\.dismiss) private var dismiss
+
+    private var shareText: String {
+        "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
+    }
+
+    var body: some View {
+        ZStack {
+            LinearGradient.catchDetail.ignoresSafeArea()
+            CatchDetailContent(location: location, topInset: showsActions ? 76 : 24)
         }
+        .overlay(alignment: .top) {
+            if showsActions { topBar }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    private var topBar: some View {
+        HStack {
+            CircleIconButton(systemName: "chevron.left") { dismiss() }
+            Spacer()
+            ShareLink(item: shareText) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color.brandWhite)
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                    .frame(width: 52, height: 52)
+                    .glassStyle(Circle())
+                    .shadow(color: Color.brandSky.opacity(0.6), radius: 16)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+    }
+}
+
+#Preview {
+    CatchDetailView(
+        location: CatchLocation(
+            fishName: "Catfish",
+            coordinate: .init(latitude: 1.0, longitude: 104.0),
+            weightKg: 0.7,
+            lengthCm: 15,
+            locationName: "South China Sea"
+        ),
+        showsActions: true
+    )
 }

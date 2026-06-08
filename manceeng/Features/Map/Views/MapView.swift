@@ -6,7 +6,6 @@
 //  marker foto di lokasinya. Dibuka dari tombol peta di halaman Main.
 //
 //  Created by M. Iqbal on 08/06/26.
-//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 //
 
 import SwiftUI
@@ -17,12 +16,13 @@ struct MapView: View {
     @StateObject private var locationManager = LocationManager()
     @Environment(\.dismiss) private var dismiss
 
-    /// Detent teratas — sheet besar yang menyisakan sedikit map di atas.
-    private let topDetent: PresentationDetent = .fraction(0.85)
-    @State private var detent: PresentationDetent = .fraction(0.85)
+    /// Catch yang langsung dipilih saat map dibuka (mis. dari History).
+    private let initialSelection: CatchLocation?
+    @State private var didApplyInitialSelection = false
 
-    init(viewModel: MapViewModel = MapViewModel()) {
+    init(viewModel: MapViewModel = MapViewModel(), initialSelection: CatchLocation? = nil) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.initialSelection = initialSelection
     }
 
     var body: some View {
@@ -33,7 +33,6 @@ struct MapView: View {
                 Annotation("", coordinate: location.coordinate, anchor: .bottom) {
                     CatchMapMarker(location: location)
                         .onTapGesture {
-                            detent = topDetent
                             withAnimation(.easeInOut(duration: 0.4)) {
                                 viewModel.select(location)
                             }
@@ -59,12 +58,22 @@ struct MapView: View {
                 mapControls
             }
         }
-        .onAppear { locationManager.requestPermission() }
-        .sheet(item: $viewModel.selectedLocation) { location in
-            CatchDetailView(location: location)
-                .presentationDetents([.fraction(0.4), topDetent], selection: $detent)
-                .presentationDragIndicator(.visible)
-                .presentationBackgroundInteraction(.enabled(upThrough: topDetent))
+        // Bottom panel custom (pengganti .sheet) — sudut kotak, full, tanpa scrim.
+        .overlay {
+            if let selected = viewModel.selectedLocation {
+                CatchDetailPanel(location: selected) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewModel.selectedLocation = nil
+                    }
+                }
+            }
+        }
+        .onAppear {
+            locationManager.requestPermission()
+            if !didApplyInitialSelection, let initialSelection {
+                didApplyInitialSelection = true
+                viewModel.select(initialSelection)
+            }
         }
     }
 
@@ -142,7 +151,5 @@ struct MapView: View {
 }
 
 #Preview {
-    NavigationStack {
-        MapView()
-    }
+    MapView()
 }

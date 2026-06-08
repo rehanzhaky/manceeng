@@ -43,12 +43,12 @@ final class MapViewModel: ObservableObject {
     func select(_ location: CatchLocation) {
         selectedLocation = location
 
-        // Sheet menutup ±85% layar bawah, jadi map yang terlihat hanya strip atas.
-        // Geser pusat kamera ke selatan agar pin muncul di strip kecil tersebut
-        // (bukan di tengah layar yang tertutup sheet).
+        // Panel custom menutup ±82% layar bawah, jadi map terlihat hanya strip atas
+        // (~18%). Geser pusat kamera ke selatan agar marker pas di tengah strip itu.
+        // Faktor ini gampang disetel: lebih kecil = pin turun, lebih besar = pin naik.
         let span = MKCoordinateSpan(latitudeDelta: 0.08, longitudeDelta: 0.08)
         let center = CLLocationCoordinate2D(
-            latitude: location.coordinate.latitude - span.latitudeDelta * 0.42,
+            latitude: location.coordinate.latitude - span.latitudeDelta * 0.60,
             longitude: location.coordinate.longitude
         )
         cameraPosition = .region(MKCoordinateRegion(center: center, span: span))

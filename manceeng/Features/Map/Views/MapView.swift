@@ -79,30 +79,17 @@ struct MapView: View {
 
     /// Share & delete untuk pin terpilih — di kanan atas layar, di luar modal.
     private func catchActions(for location: CatchLocation) -> some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 10) {
             ShareLink(item: shareText(for: location)) {
-                actionIcon("square.and.arrow.up")
+                GlassCircleIcon(systemName: "square.and.arrow.up")
             }
-            Button(role: .destructive) {
+            CircleIconButton(systemName: "trash") {
                 withAnimation { viewModel.delete(location) }
-            } label: {
-                actionIcon("trash")
             }
-            .buttonStyle(.plain)
         }
-        .padding(5)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 1))
         .padding(.trailing, 16)
         .padding(.top, 8)
         .transition(.opacity)
-    }
-
-    private func actionIcon(_ systemName: String) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(.white)
-            .frame(width: 40, height: 40)
     }
 
     private func shareText(for location: CatchLocation) -> String {
@@ -110,17 +97,9 @@ struct MapView: View {
     }
 
     private var backButton: some View {
-        Button {
-            dismiss()
-        } label: {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(.ultraThinMaterial, in: Circle())
-        }
-        .padding(.leading, 20)
-        .padding(.top, 8)
+        CircleIconButton(systemName: "chevron.left") { dismiss() }
+            .padding(.leading, 20)
+            .padding(.top, 8)
     }
 
     private var mapControls: some View {
@@ -131,20 +110,12 @@ struct MapView: View {
                 }
             }
 
-            Button {
+            CircleIconButton(systemName: "location.fill") {
                 locationManager.requestPermission()
                 withAnimation(.easeInOut(duration: 0.4)) {
                     viewModel.goToUserLocation()
                 }
-            } label: {
-                Image(systemName: "location.fill")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.brandBlue)
-                    .frame(width: 46, height: 46)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.15), lineWidth: 1))
             }
-            .buttonStyle(.plain)
         }
         .padding(.trailing, 16)
     }

@@ -69,14 +69,9 @@ struct CatchReviewView: View {
             Button {
                 showShareSection = true
             } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(Color.brandWhite)
-                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
-                    .frame(width: 52, height: 52)
-                    .glassStyle(Circle())
-                    .shadow(color: Color.brandSky.opacity(0.6), radius: 16)
+                GlassCircleIcon(systemName: "square.and.arrow.up")
             }
+            .buttonStyle(GlassPressStyle())
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)

@@ -11,6 +11,7 @@ import ARKit
 struct CameraView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = CameraViewModel()
+    @State private var showGuide = false
 
     var body: some View {
         ZStack {
@@ -40,9 +41,13 @@ struct CameraView: View {
                 bottomControls
             }
             .padding(.horizontal, 20)
-//            .padding(.top, 18)
-//            .padding(.bottom, 28)
+
+            if showGuide {
+                CameraGuideView(isPresented: $showGuide)
+                    .transition(.opacity)
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: showGuide)
         .navigationBarBackButtonHidden()
         .fullScreenCover(isPresented: $viewModel.showReview) {
             CatchReviewView(
@@ -62,32 +67,13 @@ struct CameraView: View {
 
     private var topControls: some View {
         HStack {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 34, height: 34)
-                    .background(.black.opacity(0.35), in: Circle())
-            }
-            .buttonStyle(.plain)
+            CircleIconButton(systemName: "chevron.left") { dismiss() }
 
             Spacer()
 
-            Text("Camera")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(.white)
-                .shadow(radius: 2)
-
-            Button {} label: {
-                Image(systemName: "info")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 34, height: 34)
-                    .background(.black.opacity(0.35), in: Circle())
+            CircleIconButton(systemName: "info") {
+                showGuide = true
             }
-            .buttonStyle(.plain)
         }
     }
 

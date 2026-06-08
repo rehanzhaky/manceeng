@@ -27,15 +27,14 @@ struct MapZoomControl: View {
             button("plus") { onZoom(tapZoomIn) }
 
             Rectangle()
-                .fill(Color.primary.opacity(0.2))
+                .fill(Color.brandWhite.opacity(0.2))
                 .frame(width: 22, height: 1)
 
             button("minus") { onZoom(tapZoomOut) }
         }
         .padding(.vertical, 14)
         .padding(.horizontal, 10)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 1))
+        .glassStyle(Capsule())
         .simultaneousGesture(
             DragGesture(minimumDistance: 6)
                 .onChanged { value in
@@ -56,7 +55,7 @@ struct MapZoomControl: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(Color.brandWhite)
                 .frame(width: 30, height: 30)
                 .contentShape(Rectangle())
         }

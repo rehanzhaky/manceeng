@@ -66,6 +66,6 @@ struct TopFishCardStackView: View {
 }
 
 #Preview {
-    TopFishCardStackView(model: Catch(name: "Ikan Lele", weightKg: 1.1, lengthCm: 15))
+    TopFishCardStackView(model: Catch(name: "Ikan Lele", weight: "1000g", length: "100cm", image: nil, location: nil, capturedAt: Date()))
         .padding()
 }

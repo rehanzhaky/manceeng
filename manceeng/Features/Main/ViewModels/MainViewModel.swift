@@ -12,7 +12,8 @@ final class MainViewModel: ObservableObject {
     let title = "Top 5 Catches"
 
     @Published var catches: [Catch]
-    @Published var isCameraPresented = false
+
+    @Published var showCamera = false
     @Published var isMapPresented = false
     @Published var isHistoryPresented = false
 
@@ -36,12 +37,14 @@ final class MainViewModel: ObservableObject {
     init(catches: [Catch] = []) {
         self.catches = catches
     }
-
+    
     // MARK: - Actions
 
     func capturePhoto() {
         SoundEffect.cameraShutter()
-        isCameraPresented = true
+
+        // TODO: aksi buka kamera & tambah hasil ke `catches`.
+        showCamera = true
     }
 
     func openMap() {

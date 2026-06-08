@@ -28,7 +28,7 @@ struct TopFishCardView: View {
                     Text("Berat")
                         .font(.callout)
                         .foregroundStyle(Color.brandWhite.opacity(0.7))
-                    Text(String(format: "%.1f kg", model.weightKg))
+                    Text(String(format: "%.1f kg", model.weight))
                         .font(.title2Bold)
                         .foregroundStyle(Color.brandWhite)
                 }
@@ -39,7 +39,7 @@ struct TopFishCardView: View {
                     Text("Panjang")
                         .font(.callout)
                         .foregroundStyle(Color.brandWhite.opacity(0.7))
-                    Text(String(format: "%.0f cm", model.lengthCm))
+                    Text(String(format: "%.0f cm", model.length))
                         .font(.title2Bold)
                         .foregroundStyle(Color.brandWhite)
                 }
@@ -61,5 +61,5 @@ struct TopFishCardView: View {
 }
 
 #Preview {
-    TopFishCardView(model: Catch(name: "Ikan Lele", weightKg: 1.1, lengthCm: 15))
+    TopFishCardView(model: Catch(name: "Ikan Lele", weight: "100 Kg", length: "100 Cm"))
 }

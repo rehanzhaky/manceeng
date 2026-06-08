@@ -2,10 +2,7 @@
 //  AnimatedBackgroundView.swift
 //  manceeng
 //
-//  Background halaman Main: warna dasar gelap + bubble gradient yang
-//  mengembara dan berdenyut (di-blur) di atasnya.
-//
-//  Created by M. Iqbal on 06/06/26.
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 //
 
 import SwiftUI

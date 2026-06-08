@@ -37,4 +37,5 @@ struct CameraButton: View {
         Color.brandNavy.ignoresSafeArea()
         CameraButton {}
     }
+
 }

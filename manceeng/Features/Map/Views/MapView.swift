@@ -19,7 +19,6 @@ struct MapView: View {
     /// Catch yang langsung dipilih saat map dibuka (mis. dari History).
     private let initialSelection: CatchLocation?
     @State private var didApplyInitialSelection = false
-    @State private var templateLocation: CatchLocation?
 
     init(viewModel: MapViewModel = MapViewModel(), initialSelection: CatchLocation? = nil) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -75,12 +74,6 @@ struct MapView: View {
                 didApplyInitialSelection = true
                 viewModel.select(initialSelection)
             }
-        }
-        .fullScreenCover(item: $templateLocation) { location in
-            TemplateScreen(
-                fishCatches: [FishCatch(location: location)],
-                shouldAutoShare: true
-            )
         }
     }
 

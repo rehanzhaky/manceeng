@@ -6,7 +6,8 @@
 //  dan tombol kamera. Logika & data dipegang oleh MainViewModel.
 //
 //  Created by M. Iqbal on 06/06/26.
-//
+
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 
 import SwiftUI
 
@@ -43,6 +44,10 @@ struct MainView: View {
                 .tutorialTarget(.camera)
                 .padding(.bottom, 40)
             }
+        }.fullScreenCover( //Sebagian besar menggunakan present/fullscreen modal, bukan push dari navigation stack.
+            isPresented: $viewModel.showCamera
+        ) {
+            CameraView()
         }
         .overlayPreferenceValue(TutorialAnchorKey.self) { anchors in
             GeometryReader { proxy in
@@ -64,19 +69,12 @@ struct MainView: View {
             }
             .ignoresSafeArea()
         }
-        .sheet(isPresented: $viewModel.isCameraPresented) {
-            CameraPickerView(isPresented: $viewModel.isCameraPresented) { _ in
-                // TODO: process captured image (e.g. run ML inference, add to catches).
-            }
-            .ignoresSafeArea()
-        }
         .fullScreenCover(isPresented: $viewModel.isMapPresented) {
             MapView()
         }
-        .navigationDestination(isPresented: $viewModel.isHistoryPresented) {
+        .fullScreenCover(isPresented: $viewModel.isHistoryPresented) {
             HistoryView()
         }
-        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             if !hasSeenTutorial && !viewModel.isTutorialActive {
                 viewModel.startTutorial()
@@ -116,17 +114,24 @@ struct MainView: View {
 }
 
 #Preview("Ada Card") {
-    MainView(viewModel: MainViewModel(catches: [
-        Catch(name: "Ikan Lele", weightKg: 1.1, lengthCm: 15),
-        Catch(name: "Ikan Nila", weightKg: 0.8, lengthCm: 12),
-        Catch(name: "Ikan Mas",  weightKg: 1.5, lengthCm: 20)
-    ]))
+
+    MainView(
+        viewModel: MainViewModel(
+            catches: [
+                Catch(
+                    name: "Ikan Lele", weight: "15 Kg", length: "100 Cm",
+                ),
+                Catch(name: "Ikan Lele", weight: "1.1 Kg", length: "15 Cm"),
+                Catch(name: "Ikan Nila", weight: "0.8 Kg", length: "12 Cm"),
+            ]
+        )
+    )
 }
 
 #Preview("Tutorial") {
     let viewModel = MainViewModel(catches: [
-        Catch(name: "Ikan Lele", weightKg: 1.1, lengthCm: 15)
+        Catch(name: "Ikan Lele", weight: "1.1 Kg", length: "15 Cm")
     ])
-    viewModel.startTutorial()
-    return MainView(viewModel: viewModel)
+
+    MainView(viewModel: viewModel)
 }

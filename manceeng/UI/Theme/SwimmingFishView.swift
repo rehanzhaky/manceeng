@@ -2,11 +2,9 @@
 //  SwimmingFishView.swift
 //  manceeng
 //
-//  Ikan berenang bebas ke segala arah, rotasi mengikuti arah gerak.
-//  Dipakai pada empty state halaman Main.
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 //
-//  Created by M. Iqbal on 06/06/26.
-//
+
 
 import SwiftUI
 

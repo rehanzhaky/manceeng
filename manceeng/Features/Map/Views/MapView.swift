@@ -15,7 +15,10 @@ struct MapView: View {
     @StateObject private var viewModel: MapViewModel
     @StateObject private var locationManager = LocationManager()
     @Environment(\.dismiss) private var dismiss
-    @State private var detent: PresentationDetent = .medium
+
+    /// Detent teratas — sheet besar yang menyisakan sedikit map di atas.
+    private let topDetent: PresentationDetent = .fraction(0.85)
+    @State private var detent: PresentationDetent = .fraction(0.85)
 
     init(viewModel: MapViewModel = MapViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -29,7 +32,7 @@ struct MapView: View {
                 Annotation("", coordinate: location.coordinate, anchor: .bottom) {
                     CatchMapMarker(location: location)
                         .onTapGesture {
-                            detent = .medium
+                            detent = topDetent
                             withAnimation(.easeInOut(duration: 0.4)) {
                                 viewModel.select(location)
                             }
@@ -45,19 +48,55 @@ struct MapView: View {
         .overlay(alignment: .topLeading) {
             backButton
         }
+        .overlay(alignment: .topTrailing) {
+            if let selected = viewModel.selectedLocation {
+                catchActions(for: selected)
+            }
+        }
         .overlay(alignment: .trailing) {
-            mapControls
+            if viewModel.selectedLocation == nil {
+                mapControls
+            }
         }
         .onAppear { locationManager.requestPermission() }
         .sheet(item: $viewModel.selectedLocation) { location in
-            CatchDetailView(location: location) {
-                // TODO: persist perubahan bila perlu. Untuk sekarang tutup sheet.
-                viewModel.selectedLocation = nil
-            }
-            .presentationDetents([.medium, .large], selection: $detent)
-            .presentationDragIndicator(detent == .large ? .hidden : .visible)
-            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            CatchDetailView(location: location)
+                .presentationDetents([.fraction(0.4), topDetent], selection: $detent)
+                .presentationDragIndicator(.visible)
+                .presentationBackgroundInteraction(.enabled(upThrough: topDetent))
         }
+    }
+
+    /// Share & delete untuk pin terpilih — di kanan atas layar, di luar modal.
+    private func catchActions(for location: CatchLocation) -> some View {
+        HStack(spacing: 2) {
+            ShareLink(item: shareText(for: location)) {
+                actionIcon("square.and.arrow.up")
+            }
+            Button(role: .destructive) {
+                withAnimation { viewModel.delete(location) }
+            } label: {
+                actionIcon("trash")
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(5)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 1))
+        .padding(.trailing, 16)
+        .padding(.top, 8)
+        .transition(.opacity)
+    }
+
+    private func actionIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+    }
+
+    private func shareText(for location: CatchLocation) -> String {
+        "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
     }
 
     private var backButton: some View {

@@ -3,7 +3,8 @@
 //  manceeng
 //
 //  Detail satu tangkapan (Summary Detail), ditampilkan sebagai modal sheet
-//  saat marker peta di-tap. Berisi foto ikan, info, share & tombol Save.
+//  saat marker peta di-tap. Hanya foto ikan + info; aksi (share/delete) ada
+//  di kanan atas layar peta.
 //
 //  Created by M. Iqbal on 08/06/26.
 //
@@ -13,13 +14,6 @@ import CoreLocation
 
 struct CatchDetailView: View {
     let location: CatchLocation
-    var onSave: () -> Void = {}
-
-    @Environment(\.dismiss) private var dismiss
-
-    private var shareText: String {
-        "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
-    }
 
     private var background: LinearGradient {
         LinearGradient(
@@ -37,55 +31,18 @@ struct CatchDetailView: View {
         ZStack {
             background.ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                topBar
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-
-                ScrollView {
-                    VStack(spacing: 24) {
-                        fishImage
-                        infoCard
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
+            ScrollView {
+                VStack(spacing: 24) {
+                    fishImage
+                    infoCard
                 }
-                .scrollBounceBehavior(.basedOnSize)
-
-                saveButton
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    .padding(.bottom, 24)
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 24)
             }
+            .scrollBounceBehavior(.basedOnSize)
         }
         .presentationBackground(.clear)
-    }
-
-    // MARK: - Top bar
-
-    private var topBar: some View {
-        HStack {
-            circleButton("chevron.left") { dismiss() }
-            Spacer()
-            ShareLink(item: shareText) {
-                circleIcon("square.and.arrow.up")
-            }
-        }
-    }
-
-    private func circleButton(_ systemName: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            circleIcon(systemName)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func circleIcon(_ systemName: String) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(Color(hex: "0A2A5E"))
-            .frame(width: 40, height: 40)
-            .background(Color.white.opacity(0.22), in: Circle())
     }
 
     // MARK: - Fish image
@@ -162,23 +119,6 @@ struct CatchDetailView: View {
             .foregroundStyle(Color.brandWhite)
         }
     }
-
-    // MARK: - Save
-
-    private var saveButton: some View {
-        Button(action: onSave) {
-            Text("Save")
-                .font(.headline.bold())
-                .foregroundStyle(Color.brandWhite)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color.brandBlue)
-                )
-        }
-        .buttonStyle(.plain)
-    }
 }
 
 #Preview {
@@ -193,7 +133,7 @@ struct CatchDetailView: View {
                     locationName: "South China Sea"
                 )
             )
-            .presentationDetents([.large])
+            .presentationDetents([.fraction(0.85)])
             .presentationDragIndicator(.visible)
         }
 }

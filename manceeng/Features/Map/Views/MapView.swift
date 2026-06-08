@@ -6,6 +6,7 @@
 //  marker foto di lokasinya. Dibuka dari tombol peta di halaman Main.
 //
 //  Created by M. Iqbal on 08/06/26.
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 //
 
 import SwiftUI
@@ -141,5 +142,7 @@ struct MapView: View {
 }
 
 #Preview {
-    MapView()
+    NavigationStack {
+        MapView()
+    }
 }

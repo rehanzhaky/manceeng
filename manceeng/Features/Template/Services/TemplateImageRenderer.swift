@@ -14,8 +14,9 @@ enum TemplateImageRenderer {
         data: FishCatch,
         layout: TemplateLayout,
         photoAdjustment: PhotoAdjustment = .identity,
-        exportSize: CGSize = CGSize(width: 2048, height: 2048)
+        exportLongSide: CGFloat = 2048
     ) -> UIImage? {
+        let exportSize = exportSize(for: layout, longSide: exportLongSide)
         let content = TemplateCanvasView(data: data, layout: layout, photoAdjustment: photoAdjustment)
             .frame(width: exportSize.width, height: exportSize.height)
 
@@ -24,5 +25,15 @@ enum TemplateImageRenderer {
         renderer.proposedSize = ProposedViewSize(exportSize)
 
         return renderer.uiImage
+    }
+
+    private static func exportSize(for layout: TemplateLayout, longSide: CGFloat) -> CGSize {
+        let aspectRatio = layout.contentAspectRatio
+
+        if aspectRatio >= 1 {
+            return CGSize(width: longSide, height: longSide / aspectRatio)
+        }
+
+        return CGSize(width: longSide * aspectRatio, height: longSide)
     }
 }

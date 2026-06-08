@@ -11,6 +11,7 @@ struct CatchReviewView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: CatchReviewViewModel
     @State private var showShareSection = false
+    @State private var isTemplatePresented = false
 
     let onRetake: () -> Void
     let onDone: () -> Void
@@ -55,6 +56,22 @@ struct CatchReviewView: View {
             }
         }
         .animation(.spring(response: 0.32, dampingFraction: 0.88), value: showShareSection)
+        .fullScreenCover(isPresented: $isTemplatePresented) {
+            TemplateScreen(
+                fishCatches: [reviewFishCatch],
+                shouldAutoShare: true
+            )
+        }
+    }
+
+    private var reviewFishCatch: FishCatch {
+        FishCatch(
+            fishName: viewModel.fishName.isEmpty ? "Catfish" : viewModel.fishName,
+            weight: numericValue(from: viewModel.weightText, fallback: 0.7),
+            length: numericValue(from: viewModel.lengthText, fallback: 15),
+            fishImageName: "ikan_1",
+            fishImage: viewModel.image
+        )
     }
 
     private var topBar: some View {
@@ -75,7 +92,7 @@ struct CatchReviewView: View {
 
             HStack(spacing: 8) {
                 Button {
-                    showShareSection = true
+                    isTemplatePresented = true
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 20, weight: .semibold))
@@ -171,6 +188,16 @@ struct CatchReviewView: View {
             }
             .foregroundStyle(.white)
         }
+    }
+
+    private func numericValue(from text: String, fallback: Double) -> Double {
+        let normalizedText = text.replacingOccurrences(of: ",", with: ".")
+        let candidate = normalizedText
+            .split(separator: " ")
+            .compactMap { Double($0) }
+            .first
+
+        return candidate ?? fallback
     }
 
     private var shareSection: some View {

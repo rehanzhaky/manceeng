@@ -102,7 +102,7 @@ struct TemplateCanvasView: View {
     }
 
     private func fishImage(in size: CGSize, origin: CGPoint) -> some View {
-        Image(data.fishImageName)
+        fishImageView
             .resizable()
             .scaledToFit()
             .frame(width: size.width * layout.fishImage.widthRatio)
@@ -114,7 +114,7 @@ struct TemplateCanvasView: View {
     private func adjustableFishImage(in size: CGSize, origin: CGPoint) -> some View {
         let adjustment = currentPhotoAdjustment
 
-        return Image(data.fishImageName)
+        return fishImageView
             .resizable()
             .scaledToFill()
             .frame(width: size.width, height: size.height)
@@ -123,6 +123,14 @@ struct TemplateCanvasView: View {
             .position(position(for: layout.fishImage.center, in: size, origin: origin))
             .offset(adjustment.offset)
             .clipped()
+    }
+
+    private var fishImageView: Image {
+        if let fishImage = data.fishImage {
+            return Image(uiImage: fishImage)
+        }
+
+        return Image(data.fishImageName)
     }
 
     private var photoAdjustmentGesture: some Gesture {

@@ -288,7 +288,7 @@ struct TemplateScreen: View {
 
     private func fishCatch(for index: Int) -> FishCatch {
         guard fishCatches.indices.contains(index) else {
-            return fishCatches.first ?? .barramundiSample
+            return FishCatch.samples.indices.contains(index) ? FishCatch.samples[index] : .barramundiSample
         }
 
         return fishCatches[index]

@@ -8,14 +8,12 @@
 import SwiftUI
 
 struct TopFishCardView: View {
-    var fishName: String
-    var weightName: String
-    var lengthName: String
+    let model: Catch
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(fishName)
-                .font(.Title1Bold)
+            Text(model.name)
+                .font(.title1Bold)
                 .foregroundStyle(Color.brandWhite)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -30,19 +28,19 @@ struct TopFishCardView: View {
                     Text("Berat")
                         .font(.callout)
                         .foregroundStyle(Color.brandWhite.opacity(0.7))
-                    Text(weightName)
-                        .font(.Title2Bold)
+                    Text(String(format: "%.1f kg", model.weight))
+                        .font(.title2Bold)
                         .foregroundStyle(Color.brandWhite)
                 }
-                
+
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Panjang")
                         .font(.callout)
                         .foregroundStyle(Color.brandWhite.opacity(0.7))
-                    Text(lengthName)
-                        .font(.Title2Bold)
+                    Text(String(format: "%.0f cm", model.length))
+                        .font(.title2Bold)
                         .foregroundStyle(Color.brandWhite)
                 }
             }
@@ -57,11 +55,11 @@ struct TopFishCardView: View {
                 endPoint: .bottomTrailing
             )
         )
-        .clipShape(RoundedRectangle(cornerRadius: Radius.borderRadius.rawValue))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.borderRadius))
         .padding(.horizontal, 20)
     }
 }
 
 #Preview {
-    TopFishCardView(fishName: "Ikan Lele", weightName: "1.1 kg", lengthName: "15 cm")
+    TopFishCardView(model: Catch(name: "Ikan Lele", weight: "100 Kg", length: "100 Cm"))
 }

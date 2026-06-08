@@ -17,7 +17,7 @@ struct TemplateCarouselCard: View {
         ZStack {
             RoundedRectangle(cornerRadius: 4, style: .continuous)
                 .fill(Color.black.opacity(0.08))
-                .frame(height: 280)
+                .frame(height: 300)
                 .padding(.horizontal, 18)
 
             TemplateCanvasView(
@@ -27,7 +27,7 @@ struct TemplateCarouselCard: View {
                 onPhotoAdjustmentChange: onPhotoAdjustmentChange
             )
                 .aspectRatio(layout.contentAspectRatio, contentMode: .fit)
-                .frame(height: 430)
+                .frame(height: 398)
                 .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
                 .shadow(color: .black.opacity(0.22), radius: 12, x: 0, y: 8)
         }

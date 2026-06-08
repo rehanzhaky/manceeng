@@ -18,10 +18,7 @@ struct CatchDetailView: View {
     var onDelete: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-
-    private var shareText: String {
-        "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
-    }
+    @State private var isShowingTemplateScreen = false
 
     var body: some View {
         ZStack {
@@ -40,6 +37,9 @@ struct CatchDetailView: View {
             }
             .padding(20)
         }
+        .fullScreenCover(isPresented: $isShowingTemplateScreen) {
+            TemplateScreen(shouldAutoShare: true)
+        }
     }
 
     // MARK: - Sections
@@ -56,7 +56,9 @@ struct CatchDetailView: View {
             Spacer()
 
             HStack(spacing: 4) {
-                ShareLink(item: shareText) {
+                Button {
+                    isShowingTemplateScreen = true
+                } label: {
                     icon("square.and.arrow.up")
                 }
 

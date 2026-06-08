@@ -66,7 +66,7 @@ struct TemplateCanvasView: View {
 
     private var currentPhotoAdjustment: PhotoAdjustment {
         PhotoAdjustment(
-            scale: max(0.6, min(basePhotoAdjustment.scale * magnification, 4)),
+            scale: clampedScale(basePhotoAdjustment.scale * magnification),
             offset: CGSize(
                 width: basePhotoAdjustment.offset.width + dragTranslation.width,
                 height: basePhotoAdjustment.offset.height + dragTranslation.height
@@ -127,7 +127,7 @@ struct TemplateCanvasView: View {
 
     private var photoAdjustmentGesture: some Gesture {
         SimultaneousGesture(
-            DragGesture()
+            DragGesture(minimumDistance: 0)
                 .updating($dragTranslation) { value, state, _ in
                     state = value.translation
                 }
@@ -142,7 +142,7 @@ struct TemplateCanvasView: View {
                         state = value
                     }
                     .onEnded { value in
-                        basePhotoAdjustment.scale = max(0.6, min(basePhotoAdjustment.scale * value, 4))
+                        basePhotoAdjustment.scale = clampedScale(basePhotoAdjustment.scale * value)
                         onPhotoAdjustmentChange?(basePhotoAdjustment)
                     },
                 RotationGesture()
@@ -155,6 +155,10 @@ struct TemplateCanvasView: View {
                     }
             )
         )
+    }
+
+    private func clampedScale(_ scale: CGFloat) -> CGFloat {
+        max(0.35, min(scale, 6))
     }
 
     private func anchoredText(_ text: String, anchor: TextAnchor, in size: CGSize, origin: CGPoint) -> some View {

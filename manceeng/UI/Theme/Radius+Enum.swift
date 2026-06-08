@@ -6,8 +6,7 @@
 //
 
 import Foundation
-import SwiftUI
 
-enum Radius: CGFloat {
-    case borderRadius = 24
+enum Radius {
+    static let borderRadius: CGFloat = 24
 }

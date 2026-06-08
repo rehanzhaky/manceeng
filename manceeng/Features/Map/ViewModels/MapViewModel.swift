@@ -34,6 +34,16 @@ final class MapViewModel: ObservableObject {
 
     func select(_ location: CatchLocation) {
         selectedLocation = location
+
+        // Sheet medium menutup ±setengah layar bawah, jadi area peta yang terlihat
+        // adalah setengah atas. Geser pusat kamera ke selatan ¼ span agar pin tampil
+        // di tengah area sisa tersebut (bukan tengah layar penuh).
+        let span = MKCoordinateSpan(latitudeDelta: 0.08, longitudeDelta: 0.08)
+        let center = CLLocationCoordinate2D(
+            latitude: location.coordinate.latitude - span.latitudeDelta * 0.25,
+            longitude: location.coordinate.longitude
+        )
+        cameraPosition = .region(MKCoordinateRegion(center: center, span: span))
     }
 
     func delete(_ location: CatchLocation) {

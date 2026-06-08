@@ -14,6 +14,7 @@ import MapKit
 struct MapView: View {
     @StateObject private var viewModel: MapViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var detent: PresentationDetent = .medium
 
     init(viewModel: MapViewModel = MapViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -24,21 +25,26 @@ struct MapView: View {
             ForEach(viewModel.locations) { location in
                 Annotation("", coordinate: location.coordinate, anchor: .bottom) {
                     CatchMapMarker(location: location)
-                        .onTapGesture { viewModel.select(location) }
+                        .onTapGesture {
+                            detent = .medium
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                viewModel.select(location)
+                            }
+                        }
                 }
             }
         }
-        .mapStyle(.hybrid(elevation: .realistic))
+        .mapStyle(.standard(elevation: .flat))
         .ignoresSafeArea()
         .overlay(alignment: .topLeading) {
             backButton
         }
         .sheet(item: $viewModel.selectedLocation) { location in
-            CatchDetailView(location: location) {
+            CatchDetailView(location: location, isExpanded: detent == .large) {
                 viewModel.delete(location)
             }
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
+            .presentationDetents([.medium, .large], selection: $detent)
+            .presentationDragIndicator(detent == .large ? .hidden : .visible)
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
         }
     }

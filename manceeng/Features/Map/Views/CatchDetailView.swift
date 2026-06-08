@@ -13,7 +13,11 @@ import CoreLocation
 
 struct CatchDetailView: View {
     let location: CatchLocation
+    /// `true` saat sheet ditarik penuh → tampil seperti halaman (ada tombol back).
+    var isExpanded: Bool = false
     var onDelete: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
 
     private var shareText: String {
         "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
@@ -42,7 +46,15 @@ struct CatchDetailView: View {
 
     private var actionBar: some View {
         HStack {
+            if isExpanded {
+                Button { dismiss() } label: {
+                    icon("chevron.left")
+                }
+                .background(.ultraThinMaterial, in: Circle())
+            }
+
             Spacer()
+
             HStack(spacing: 4) {
                 ShareLink(item: shareText) {
                     icon("square.and.arrow.up")

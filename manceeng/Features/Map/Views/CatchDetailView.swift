@@ -2,8 +2,8 @@
 //  CatchDetailView.swift
 //  manceeng
 //
-//  Detail satu tangkapan, ditampilkan sebagai modal sheet saat marker peta
-//  di-tap. Berisi foto ikan, info (nama/berat/panjang/lokasi), share & delete.
+//  Detail satu tangkapan (Summary Detail), ditampilkan sebagai modal sheet
+//  saat marker peta di-tap. Berisi foto ikan, info, share & tombol Save.
 //
 //  Created by M. Iqbal on 08/06/26.
 //
@@ -13,9 +13,7 @@ import CoreLocation
 
 struct CatchDetailView: View {
     let location: CatchLocation
-    /// `true` saat sheet ditarik penuh → tampil seperti halaman (ada tombol back).
-    var isExpanded: Bool = false
-    var onDelete: () -> Void
+    var onSave: () -> Void = {}
 
     @Environment(\.dismiss) private var dismiss
 
@@ -23,58 +21,74 @@ struct CatchDetailView: View {
         "\(location.fishName) — \(location.weightKg.formatted()) kg, \(location.lengthCm.formatted()) cm @ \(location.locationName)"
     }
 
+    private var background: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color(hex: "2C7FB8"),
+                Color(hex: "0B3A86"),
+                Color(hex: "05123A")
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color.brandBlue, Color.brandDark],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            background.ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                actionBar
-                fishImage
-                infoCard
-                Spacer(minLength: 0)
+            VStack(spacing: 0) {
+                topBar
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        fishImage
+                        infoCard
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+
+                saveButton
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 24)
             }
-            .padding(20)
         }
+        .presentationBackground(.clear)
     }
 
-    // MARK: - Sections
+    // MARK: - Top bar
 
-    private var actionBar: some View {
+    private var topBar: some View {
         HStack {
-            if isExpanded {
-                Button { dismiss() } label: {
-                    icon("chevron.left")
-                }
-                .background(.ultraThinMaterial, in: Circle())
-            }
-
+            circleButton("chevron.left") { dismiss() }
             Spacer()
-
-            HStack(spacing: 4) {
-                ShareLink(item: shareText) {
-                    icon("square.and.arrow.up")
-                }
-
-                Button(role: .destructive, action: onDelete) {
-                    icon("trash")
-                }
+            ShareLink(item: shareText) {
+                circleIcon("square.and.arrow.up")
             }
-            .padding(6)
-            .background(.ultraThinMaterial, in: Capsule())
         }
     }
 
-    private func icon(_ systemName: String) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 18, weight: .semibold))
-            .foregroundStyle(Color.brandWhite)
-            .frame(width: 40, height: 40)
+    private func circleButton(_ systemName: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            circleIcon(systemName)
+        }
+        .buttonStyle(.plain)
     }
+
+    private func circleIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(Color(hex: "0A2A5E"))
+            .frame(width: 40, height: 40)
+            .background(Color.white.opacity(0.22), in: Circle())
+    }
+
+    // MARK: - Fish image
 
     private var fishImage: some View {
         Group {
@@ -86,65 +100,84 @@ struct CatchDetailView: View {
                 Image(systemName: "fish.fill")
                     .resizable()
                     .scaledToFit()
-                    .foregroundStyle(Color.brandWhite.opacity(0.85))
-                    .padding(.horizontal, 40)
+                    .foregroundStyle(Color.brandWhite.opacity(0.9))
+                    .padding(.horizontal, 60)
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 180)
+        .frame(height: 220)
+        .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
     }
 
-    private var infoCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            field(label: "Nama Ikan", value: location.fishName, prominent: true)
+    // MARK: - Info card
 
-            HStack(alignment: .top) {
+    private var infoCard: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            field(label: "Nama Ikan", value: location.fishName)
+
+            HStack(alignment: .top, spacing: 0) {
                 valueField(label: "Weight", value: location.weightKg.formatted(), unit: "kg")
-                Spacer()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 valueField(label: "Length", value: location.lengthCm.formatted(), unit: "cm")
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            field(label: "Location", value: location.locationName, prominent: true)
+            field(label: "Location", value: location.locationName)
         }
-        .padding(20)
+        .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(Color.white.opacity(0.06))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.brandWhite.opacity(0.25), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.28), lineWidth: 1)
         )
     }
 
-    // MARK: - Rows
-
-    private func field(label: String, value: String, prominent: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    private func field(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.footnote)
+                .font(.subheadline)
                 .foregroundStyle(Color.brandWhite.opacity(0.7))
             Text(value)
-                .font(prominent ? .title3.bold() : .body)
+                .font(.title2.bold())
                 .foregroundStyle(Color.brandWhite)
         }
     }
 
     private func valueField(label: String, value: String, unit: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.footnote)
+                .font(.subheadline)
                 .foregroundStyle(Color.brandWhite.opacity(0.7))
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(value)
-                    .font(.title.bold())
+                    .font(.system(size: 30, weight: .bold))
                 Text(unit)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.brandWhite.opacity(0.8))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.brandWhite.opacity(0.85))
             }
             .foregroundStyle(Color.brandWhite)
         }
+    }
+
+    // MARK: - Save
+
+    private var saveButton: some View {
+        Button(action: onSave) {
+            Text("Save")
+                .font(.headline.bold())
+                .foregroundStyle(Color.brandWhite)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.brandBlue)
+                )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -158,10 +191,9 @@ struct CatchDetailView: View {
                     weightKg: 0.7,
                     lengthCm: 15,
                     locationName: "South China Sea"
-                ),
-                onDelete: {}
+                )
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
 }

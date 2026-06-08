@@ -13,6 +13,7 @@ import MapKit
 
 struct MapView: View {
     @StateObject private var viewModel: MapViewModel
+    @StateObject private var locationManager = LocationManager()
     @Environment(\.dismiss) private var dismiss
     @State private var detent: PresentationDetent = .medium
 
@@ -22,6 +23,8 @@ struct MapView: View {
 
     var body: some View {
         Map(position: $viewModel.cameraPosition) {
+            UserAnnotation()
+
             ForEach(viewModel.locations) { location in
                 Annotation("", coordinate: location.coordinate, anchor: .bottom) {
                     CatchMapMarker(location: location)
@@ -35,13 +38,21 @@ struct MapView: View {
             }
         }
         .mapStyle(.standard(elevation: .flat))
+        .onMapCameraChange { context in
+            viewModel.updateVisibleRegion(context.region)
+        }
         .ignoresSafeArea()
         .overlay(alignment: .topLeading) {
             backButton
         }
+        .overlay(alignment: .trailing) {
+            mapControls
+        }
+        .onAppear { locationManager.requestPermission() }
         .sheet(item: $viewModel.selectedLocation) { location in
-            CatchDetailView(location: location, isExpanded: detent == .large) {
-                viewModel.delete(location)
+            CatchDetailView(location: location) {
+                // TODO: persist perubahan bila perlu. Untuk sekarang tutup sheet.
+                viewModel.selectedLocation = nil
             }
             .presentationDetents([.medium, .large], selection: $detent)
             .presentationDragIndicator(detent == .large ? .hidden : .visible)
@@ -61,6 +72,32 @@ struct MapView: View {
         }
         .padding(.leading, 20)
         .padding(.top, 8)
+    }
+
+    private var mapControls: some View {
+        VStack(spacing: 16) {
+            MapZoomControl { factor in
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    viewModel.zoom(by: factor)
+                }
+            }
+
+            Button {
+                locationManager.requestPermission()
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    viewModel.goToUserLocation()
+                }
+            } label: {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color.brandBlue)
+                    .frame(width: 46, height: 46)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.15), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.trailing, 16)
     }
 }
 

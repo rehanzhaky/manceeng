@@ -14,7 +14,7 @@ struct EmptyCatchStateView: View {
         VStack(spacing: 16) {
             SwimmingFishView()
 
-            Text("Perlu tambah gambar dulu")
+            Text("Add your first catch")
                 .font(.subheadline)
                 .foregroundStyle(Color.brandWhite.opacity(0.5))
         }

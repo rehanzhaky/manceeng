@@ -6,7 +6,8 @@
 //  dan tombol kamera. Logika & data dipegang oleh MainViewModel.
 //
 //  Created by M. Iqbal on 06/06/26.
-//
+
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 
 import SwiftUI
 

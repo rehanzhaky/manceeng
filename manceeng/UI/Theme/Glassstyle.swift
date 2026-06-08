@@ -1,11 +1,8 @@
 //
-//  GlassStyle.swift
+//  Glassstyle.swift
 //  manceeng
 //
-//  Modifier "liquid glass": fill biru tua semi-transparan + aksen gradient
-//  biru di tepi. Dipakai oleh tombol & kartu di halaman Main.
-//
-//  Created by M. Iqbal on 06/06/26.
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 //
 
 import SwiftUI

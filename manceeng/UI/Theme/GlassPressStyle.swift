@@ -2,9 +2,9 @@
 //  GlassPressStyle.swift
 //  manceeng
 //
-//  Shared ButtonStyle that provides the spring press-feedback used by
-//  CameraButton and CircleIconButton.
+//  Created by Raihan Zhaky Al Hafizh on 08/06/26.
 //
+
 
 import SwiftUI
 

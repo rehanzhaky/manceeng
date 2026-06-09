@@ -60,20 +60,11 @@ struct FishCollectionCard: View {
         )
     }
 
-    @ViewBuilder
     private var thumbnail: some View {
-        if let imageName = location.imageName {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 72, height: 72)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        } else {
-            Image(systemName: "fish.fill")
-                .font(.system(size: 52))
-                .foregroundStyle(Color.brandWhite)
-                .frame(width: 78, height: 72)
-        }
+        Image(location.imageName ?? "ikan_1")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 80, height: 72)
     }
 }
 

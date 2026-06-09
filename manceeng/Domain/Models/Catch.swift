@@ -18,6 +18,11 @@ struct Catch: Identifiable {
     var capturedAt: Date = Date()
 }
 
+extension Catch: Hashable {
+    static func == (lhs: Catch, rhs: Catch) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+}
+
 //planning buat nanti (Krisna)
 //struct Catch: Identifiable {
 //

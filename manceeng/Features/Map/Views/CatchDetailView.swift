@@ -47,22 +47,12 @@ struct CatchDetailContent: View {
     }
 
     private var fishImage: some View {
-        Group {
-            if let imageName = location.imageName {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                Image(systemName: "fish.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundStyle(Color.brandWhite.opacity(0.9))
-                    .padding(.horizontal, 60)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 220)
-        .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
+        Image(location.imageName ?? "ikan_1")
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity)
+            .frame(height: 220)
+            .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
     }
 
     private var infoCard: some View {

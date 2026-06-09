@@ -41,10 +41,14 @@ final class MainViewModel: ObservableObject {
     // MARK: - Actions
 
     func capturePhoto() {
-        SoundEffect.cameraShutter()
-
-        // TODO: aksi buka kamera & tambah hasil ke `catches`.
+//        SoundEffect.cameraShutter()
         showCamera = true
+    }
+
+    /// Tambahkan hasil tangkapan (dari Save di CatchReview) ke beranda & tutup kamera.
+    func addCatch(_ newCatch: Catch) {
+        catches.insert(newCatch, at: 0)
+        showCamera = false
     }
 
     func openMap() {

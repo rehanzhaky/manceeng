@@ -13,20 +13,20 @@ struct CatchReviewView: View {
     @State private var isTemplatePresented = false
 
     let onRetake: () -> Void
-    let onDone: () -> Void
+    let onSave: (Catch) -> Void
 
     init(
         image: UIImage?,
         segmentedFishes: [SegmentedFish],
         onRetake: @escaping () -> Void,
-        onDone: @escaping () -> Void
+        onSave: @escaping (Catch) -> Void
     ) {
         _viewModel = StateObject(wrappedValue: CatchReviewViewModel(
             image: image,
             segmentedFishes: segmentedFishes
         ))
         self.onRetake = onRetake
-        self.onDone = onDone
+        self.onSave = onSave
     }
 
     var body: some View {
@@ -155,7 +155,20 @@ struct CatchReviewView: View {
     }
 
     private var saveButton: some View {
-        ButtonOnboard(title: "Save", action: onDone)
+        ButtonOnboard(title: "Save") {
+            onSave(savedCatch)
+        }
+    }
+
+    /// Bangun model `Catch` dari hasil review untuk ditampilkan sebagai card di beranda.
+    private var savedCatch: Catch {
+        Catch(
+            name: viewModel.fishName,
+            weight: viewModel.weightText,
+            length: viewModel.lengthText,
+            image: viewModel.image,
+            location: "South China Sea"
+        )
     }
 
     private func numericValue(from text: String, fallback: Double) -> Double {
@@ -286,5 +299,5 @@ private struct ReviewCroppedPreview: View {
 }
 
 #Preview {
-    CatchReviewView(image: nil, segmentedFishes: [], onRetake: {}, onDone: {})
+    CatchReviewView(image: nil, segmentedFishes: [], onRetake: {}, onSave: { _ in })
 }

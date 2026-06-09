@@ -14,6 +14,7 @@ import SwiftUI
 struct MainView: View {
     @StateObject private var viewModel: MainViewModel
     @AppStorage("hasSeenMainTutorial") private var hasSeenTutorial = false
+    @State private var selectedCatch: Catch?
 
     init(viewModel: MainViewModel = MainViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -32,6 +33,9 @@ struct MainView: View {
 
                 if let front = viewModel.catches.first {
                     TopFishCardStackView(model: front)
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.3)) { selectedCatch = front }
+                        }
                 } else {
                     EmptyCatchStateView()
                 }
@@ -44,10 +48,11 @@ struct MainView: View {
                 .tutorialTarget(.camera)
                 .padding(.bottom, 40)
             }
-        }.fullScreenCover( //Sebagian besar menggunakan present/fullscreen modal, bukan push dari navigation stack.
+        }
+        .fullScreenCover( //Sebagian besar menggunakan present/fullscreen modal, bukan push dari navigation stack.
             isPresented: $viewModel.showCamera
         ) {
-            CameraView()
+            CameraView(onSave: { viewModel.addCatch($0) })
         }
         .overlayPreferenceValue(TutorialAnchorKey.self) { anchors in
             GeometryReader { proxy in
@@ -69,11 +74,26 @@ struct MainView: View {
             }
             .ignoresSafeArea()
         }
-        .fullScreenCover(isPresented: $viewModel.isMapPresented) {
+        // Pindah halaman = push (geser dari kanan), bukan modal atas-bawah.
+        .navigationDestination(isPresented: $viewModel.isMapPresented) {
             MapView()
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationBarBackButtonHidden(true)
         }
-        .fullScreenCover(isPresented: $viewModel.isHistoryPresented) {
+        .navigationDestination(isPresented: $viewModel.isHistoryPresented) {
             HistoryView()
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationBarBackButtonHidden(true)
+        }
+        .navigationDestination(item: $selectedCatch) { item in
+            // Tap kartu beranda → buka detail tangkapan di atas peta (pin + panel detail).
+            let location = CatchLocation(item)
+            MapView(
+                viewModel: MapViewModel(locations: CatchLocation.samples + [location]),
+                initialSelection: location
+            )
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationBarBackButtonHidden(true)
         }
         .onAppear {
             if !hasSeenTutorial && !viewModel.isTutorialActive {

@@ -36,25 +36,10 @@ struct CatchMapMarker: View {
         .shadow(color: .black.opacity(0.35), radius: 4, y: 2)
     }
 
-    @ViewBuilder
     private var photo: some View {
-        if let imageName = location.imageName {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-        } else {
-            // Placeholder: gradient brand + ikon ikan.
-            ZStack {
-                LinearGradient(
-                    colors: [Color.brandBlue, Color.brandCyan],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                Image(systemName: "fish.fill")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-        }
+        Image(location.imageName ?? "ikan_1")
+            .resizable()
+            .scaledToFill()
     }
 }
 

@@ -11,6 +11,9 @@ import SwiftUI
 
 struct CameraGuideView: View {
     @Binding var isPresented: Bool
+    /// Bila diisi, tampilkan tombol lanjut (mis. "Mulai") yang membuka kamera
+    /// setelah panduan ditutup. `nil` → panduan hanya informatif (tombol X saja).
+    var onContinue: (() -> Void)? = nil
 
     @State private var page = 0
     @State private var appeared = false
@@ -54,9 +57,15 @@ struct CameraGuideView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
 
             dots
-                .padding(.bottom, 22)
+                .padding(.bottom, onContinue == nil ? 22 : 16)
+
+            if let onContinue {
+                continueButton(onContinue)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+            }
         }
-        .frame(height: 440)
+        .frame(height: onContinue == nil ? 440 : 500)
         .background(
             ZStack {
                 LinearGradient.catchDetail
@@ -116,6 +125,22 @@ struct CameraGuideView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private func continueButton(_ action: @escaping () -> Void) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.25)) { isPresented = false }
+            action()
+        } label: {
+            Text("Mulai Capture")
+                .font(.ButtonFont)
+                .foregroundStyle(Color.brandWhite)
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(Color.brandBlue)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.borderRadius))
+        }
+        .buttonStyle(.plain)
     }
 
     private var dots: some View {

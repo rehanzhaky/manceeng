@@ -11,7 +11,10 @@ import Foundation
 import CoreLocation
 
 /// Satu titik tangkapan ikan di peta.
-struct CatchLocation: Identifiable {
+struct CatchLocation: Identifiable, Hashable {
+    static func == (lhs: CatchLocation, rhs: CatchLocation) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+
     let id = UUID()
     let fishName: String
     let coordinate: CLLocationCoordinate2D
@@ -36,6 +39,29 @@ struct CatchLocation: Identifiable {
         self.lengthCm = lengthCm
         self.locationName = locationName
         self.imageName = imageName
+    }
+}
+
+extension CatchLocation {
+    /// Konversi `Catch` (model beranda, berat/panjang berupa String) ke `CatchLocation`
+    /// agar bisa ditampilkan di CatchDetail. Koordinat dummy (tak ditampilkan di panel).
+    init(_ item: Catch) {
+        self.init(
+            fishName: item.name,
+            // Belum ada geotag asli dari kamera → pakai koordinat default (South China Sea)
+            // agar pin muncul di area yang masuk akal saat dibuka di peta.
+            coordinate: .init(latitude: 1.115, longitude: 104.065),
+            weightKg: CatchLocation.numericPrefix(item.weight),
+            lengthCm: CatchLocation.numericPrefix(item.length),
+            locationName: item.location ?? "—"
+        )
+    }
+
+    /// Ambil angka di depan string, mis. "0.7 kg" → 0.7, "15 cm" → 15.
+    private static func numericPrefix(_ text: String) -> Double {
+        let cleaned = text.replacingOccurrences(of: ",", with: ".")
+        let numeric = cleaned.prefix { $0.isNumber || $0 == "." }
+        return Double(numeric) ?? 0
     }
 }
 

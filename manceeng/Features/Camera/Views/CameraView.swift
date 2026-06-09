@@ -11,7 +11,12 @@ import ARKit
 struct CameraView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = CameraViewModel()
-    @State private var showGuide = false
+    /// Tampil otomatis saat masuk layar kamera (kamera sudah jalan di belakang),
+    /// lalu bisa dibuka lagi lewat tombol info.
+    @State private var showGuide = true
+
+    /// Dipanggil saat user menekan Save di review — hasil tangkapan dikirim ke beranda.
+    var onSave: (Catch) -> Void = { _ in }
 
     var body: some View {
         ZStack {
@@ -54,7 +59,7 @@ struct CameraView: View {
                 image: viewModel.capturedImage,
                 segmentedFishes: viewModel.segmentedFishes,
                 onRetake: viewModel.retry,
-                onDone: { dismiss() }
+                onSave: onSave
             )
         }
         .onDisappear {

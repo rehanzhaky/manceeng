@@ -44,8 +44,10 @@ struct HistoryView: View {
             .padding(.top, 8)
         }
         .toolbar(.hidden, for: .navigationBar)
-        .fullScreenCover(item: $viewModel.selectedLocation) { location in
+        .navigationDestination(item: $viewModel.selectedLocation) { location in
             MapView(initialSelection: location)
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationBarBackButtonHidden(true)
         }
     }
 

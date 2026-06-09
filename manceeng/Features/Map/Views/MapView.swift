@@ -87,9 +87,13 @@ struct MapView: View {
     /// Share & delete untuk pin terpilih — di kanan atas layar, di luar modal.
     private func catchActions(for location: CatchLocation) -> some View {
         HStack(spacing: 10) {
-            ShareLink(item: shareText(for: location)) {
+            Button {
+                templateLocation = location
+            } label: {
                 GlassCircleIcon(systemName: "square.and.arrow.up")
             }
+            .buttonStyle(.plain)
+
             CircleIconButton(systemName: "trash") {
                 withAnimation { viewModel.delete(location) }
             }

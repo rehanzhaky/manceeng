@@ -1,8 +1,13 @@
 {
   "images" : [
     {
+<<<<<<< HEAD
       "idiom" : "universal",
       "platform" : "ios",
+=======
+      "idiom" : "ios-marketing",
+      "scale" : "1x",
+>>>>>>> main
       "size" : "1024x1024"
     }
   ],

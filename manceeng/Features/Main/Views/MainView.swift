@@ -20,6 +20,7 @@ struct MainView: View {
     }
 
     var body: some View {
+        NavigationStack {
         ZStack {
             AnimatedBackgroundView()
 
@@ -78,6 +79,7 @@ struct MainView: View {
             if !hasSeenTutorial && !viewModel.isTutorialActive {
                 viewModel.startTutorial()
             }
+        }
         }
     }
 

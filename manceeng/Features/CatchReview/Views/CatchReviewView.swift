@@ -10,7 +10,7 @@ import SwiftUI
 struct CatchReviewView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: CatchReviewViewModel
-    @State private var showShareSection = false
+    @State private var isTemplatePresented = false
 
     let onRetake: () -> Void
     let onDone: () -> Void
@@ -50,14 +50,23 @@ struct CatchReviewView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 24)
             }
-
-            if showShareSection {
-                shareSection
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
         }
         .overlay(alignment: .top) { topBar }
-        .animation(.spring(response: 0.32, dampingFraction: 0.88), value: showShareSection)
+        .fullScreenCover(isPresented: $isTemplatePresented) {
+            TemplateScreen(
+                fishCatches: [reviewFishCatch],
+                shouldAutoShare: true
+            )
+        }
+    }
+
+    private var reviewFishCatch: FishCatch {
+        FishCatch(
+            fishName: viewModel.fishName.isEmpty ? "Catfish" : viewModel.fishName,
+            weight: numericValue(from: viewModel.weightText, fallback: 0.7),
+            length: numericValue(from: viewModel.lengthText, fallback: 15),
+            fishImageName: "ikan_1"
+        )
     }
 
     private var topBar: some View {
@@ -67,7 +76,7 @@ struct CatchReviewView: View {
             Spacer()
 
             Button {
-                showShareSection = true
+                isTemplatePresented = true
             } label: {
                 GlassCircleIcon(systemName: "square.and.arrow.up")
             }
@@ -149,62 +158,14 @@ struct CatchReviewView: View {
         ButtonOnboard(title: "Save", action: onDone)
     }
 
-    private var shareSection: some View {
-        VStack(spacing: 18) {
-            HStack {
-                Spacer()
+    private func numericValue(from text: String, fallback: Double) -> Double {
+        let normalizedText = text.replacingOccurrences(of: ",", with: ".")
+        let candidate = normalizedText
+            .split(separator: " ")
+            .compactMap { Double($0) }
+            .first
 
-                Button {
-                    showShareSection = false
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(.white.opacity(0.18), in: Circle())
-                }
-                .buttonStyle(.plain)
-            }
-
-            Text("Share section")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(.white)
-
-            HStack(spacing: 18) {
-                shareButton(title: "Instagram", systemName: "camera.fill", color: Color(hex: "E4405F"))
-                shareButton(title: "WhatsApp", systemName: "phone.fill", color: Color(hex: "25D366"))
-                shareButton(title: "Message", systemName: "message.fill", color: Color(hex: "34C759"))
-                shareButton(title: "More", systemName: "ellipsis", color: Color.white.opacity(0.9), darkIcon: true)
-            }
-        }
-        .padding(.horizontal, 22)
-        .padding(.top, 12)
-        .padding(.bottom, 28)
-        .frame(maxWidth: .infinity)
-        .background(Color.brandNavy.opacity(0.92), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(.white.opacity(0.18), lineWidth: 1)
-        )
-        .frame(maxHeight: .infinity, alignment: .bottom)
-        .ignoresSafeArea(edges: .bottom)
-    }
-
-    private func shareButton(title: String, systemName: String, color: Color, darkIcon: Bool = false) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: systemName)
-                .font(.system(size: 23, weight: .bold))
-                .foregroundStyle(darkIcon ? .black : .white)
-                .frame(width: 50, height: 50)
-                .background(color, in: RoundedRectangle(cornerRadius: 8))
-
-            Text(title)
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(.white.opacity(0.86))
-                .lineLimit(1)
-                .minimumScaleFactor(0.72)
-                .frame(width: 58)
-        }
+        return candidate ?? fallback
     }
 }
 

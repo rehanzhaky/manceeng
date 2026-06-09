@@ -9,14 +9,9 @@
 import SwiftUI
 
 struct SwimmingFishView: View {
-    // fish.fill menghadap KANAN secara default — head at image (1, 0).
-    // scaleX: -1 mirrors the fish so it faces LEFT.
-    // tilt (rotationEffect) is applied AFTER scaleEffect, so transforms compose as:
-    //   screen_pos = Rotation(tilt) * Scale(scaleX) * image_pos
-    //
-    // For head at image (1, 0):
-    //   Right-facing (scaleX=+1): screen head = (cos tilt,  sin tilt)  → θ = atan2(dy, dx)
-    //   Left-facing  (scaleX=-1): screen head = (−cos tilt, −sin tilt) → θ = atan2(−dy, −dx)
+    // fish.fill menghadap KANAN secara default (0°).
+    // scaleX: -1 dipakai saat bergerak ke kiri agar ikan tidak terbalik (belly tetap di bawah).
+    // Tilt (rotasi) dihitung dari komponen vertikal relatif terhadap arah hadap ikan.
     @State private var scaleX: CGFloat = 1
     @State private var posX: CGFloat = 0
     @State private var posY: CGFloat = 0
@@ -65,15 +60,12 @@ struct SwimmingFishView: View {
         let newScaleX: CGFloat = dx > 5 ? 1 : (dx < -5 ? -1 : scaleX)
         let needsFlip = newScaleX != scaleX
 
-        // Tilt so the head faces the destination.
-        // Right-facing: head at (cos θ, sin θ)  → θ = atan2(dy,  dx)
-        // Left-facing:  head at (−cos θ, −sin θ) → θ = atan2(−dy, −dx)
-        let newTilt: Double
-        if newScaleX > 0 {
-            newTilt = atan2(Double(dy),  Double(dx))  * 180 / .pi
-        } else {
-            newTilt = atan2(-Double(dy), -Double(dx)) * 180 / .pi
-        }
+        // Tilt agar kepala ikan menghadap ke arah tujuan (belly tetap di bawah, |θ|<90°).
+        // Hadap kanan (scaleX=+1): θ = atan2(dy, dx)
+        // Hadap kiri  (scaleX=-1): θ = atan2(-dy, -dx)
+        let newTilt: Double = newScaleX > 0
+            ? atan2(Double(dy), Double(dx)) * 180 / .pi
+            : atan2(-Double(dy), -Double(dx)) * 180 / .pi
 
         let pxPerSec = Double.random(in: 38...68)
         let moveDur  = max(0.7, dist / CGFloat(pxPerSec))
@@ -83,7 +75,7 @@ struct SwimmingFishView: View {
             // Squish to flat, flip direction while invisible, then expand.
             withAnimation(.easeIn(duration: 0.08)) { scaleX = 0 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-                // scaleX state is 0; animate to newScaleX so the expand is visible.
+                scaleX = newScaleX
                 withAnimation(.easeOut(duration: 0.08)) {
                     scaleX = newScaleX
                     tilt = newTilt

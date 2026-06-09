@@ -17,12 +17,10 @@ struct Opening: View {
     var body: some View {
         VStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.brandDark.opacity(0.4))
+                .fill(Color.brandDark.opacity(0))
                 .frame(width: 363, height: 380)
                 .overlay(
-                    Text("Image Mockup")
-                        .font(.Title1Bold)
-                        .foregroundStyle(Color.brandWhite.opacity(0.4))
+                    Image("onboarding1")
                 )
                 .padding(.top, 60)
             Spacer()
